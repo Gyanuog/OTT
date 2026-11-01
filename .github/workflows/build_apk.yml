@@ -26,25 +26,13 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: Cache Gradle Packages
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
 
       - name: Build Standalone APK with Gradle
         run: |
           cd android
-          if [ ! -f gradle/wrapper/gradle-wrapper.jar ]; then
-            gradle wrapper
-          fi
+          gradle wrapper
           chmod +x gradlew
           ./gradlew assembleDebug --stacktrace
 
