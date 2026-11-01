@@ -40,15 +40,24 @@ def _codec_family(vcodec):
 
 
 def _stream_ok(info):
-    """True if a googlevideo URL from this extraction actually serves bytes."""
-    f = next((f for f in info.get("formats") or []
-              if f.get("protocol") == "https" and f.get("url") and f.get("vcodec") not in (None, "none")), None)
-    if not f:
+    """True if googlevideo URLs for both video and audio actually serve bytes."""
+    v_format = next((f for f in info.get("formats") or []
+                     if f.get("protocol") == "https" and f.get("url") and f.get("vcodec") not in (None, "none")), None)
+    a_format = next((f for f in info.get("formats") or []
+                     if f.get("protocol") == "https" and f.get("url") and f.get("acodec") not in (None, "none")), None)
+    if not v_format:
         return False
     try:
-        conn, up = upstream_get(f["url"], {**(f.get("http_headers") or {}), "Range": "bytes=0-1023"})
+        conn, up = upstream_get(v_format["url"], {**(v_format.get("http_headers") or {}), "Range": "bytes=0-1023"})
         up.read()
-        return up.status in (200, 206)
+        if up.status not in (200, 206):
+            return False
+        if a_format:
+            conn, up = upstream_get(a_format["url"], {**(a_format.get("http_headers") or {}), "Range": "bytes=0-1023"})
+            up.read()
+            if up.status not in (200, 206):
+                return False
+        return True
     except (http.client.HTTPException, OSError):
         return False
 
@@ -131,6 +140,18 @@ def extract_video(vid):
                 "abr": round(f.get("abr") or f.get("tbr") or 0),
                 "lang": f.get("language"),
                 "default": (f.get("format_note") or "").lower().find("original") >= 0,
+            })
+        elif has_v and has_a:
+            videos.append({
+                "id": fid,
+                "url": f["url"],
+                "height": f.get("height") or 0,
+                "fps": f.get("fps") or 0,
+                "headers": f.get("http_headers") or {},
+                "codec": _codec_family(f.get("vcodec")),
+                "codecs": f.get("vcodec"),
+                "mime": f"video/{f.get('ext')}",
+                "tbr": round(f.get("tbr") or 0),
             })
     videos.sort(key=lambda f: (f["height"], f["fps"], f["tbr"]), reverse=True)
     audios.sort(key=lambda f: (f["default"], f["abr"]), reverse=True)

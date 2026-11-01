@@ -33,7 +33,12 @@ BASE_OPTS = {
     "noplaylist": True,
     "js_runtimes": {"node": {}},
     "mark_watched": False,
-    "extractor_args": {"youtube": {"skip": ["hls", "dash"]}},
+    "extractor_args": {
+        "youtube": {
+            "player_client": ["visionos", "android", "tvhtml5"],
+            "skip": ["hls", "dash"],
+        }
+    },
 }
 
 YT_SOURCE = os.environ.get("YT_SOURCE_ADDRESS", "")
@@ -45,6 +50,15 @@ if YT_PROXY_URL:
     BASE_OPTS["proxy"] = YT_PROXY_URL
 
 YT_COOKIES = os.environ.get("YT_COOKIES", "")
+if not YT_COOKIES:
+    for candidate in [
+        os.path.join(ROOT, "www.youtube.com_cookies.txt"),
+        os.path.expanduser("~/.config/localtube/cookies.txt"),
+    ]:
+        if os.path.isfile(candidate):
+            YT_COOKIES = candidate
+            break
+
 if YT_COOKIES and os.path.isfile(YT_COOKIES):
     BASE_OPTS["cookiefile"] = YT_COOKIES
 

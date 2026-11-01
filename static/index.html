@@ -846,7 +846,7 @@ document.addEventListener("pointerdown", e => { const c = e.target.closest?.("[d
 
 // ---------- player ----------
 // YouTube: separate video + audio streams kept in sync. MX: one HLS stream via hls.js.
-let kind = "yt", hls = null, retried = false, cur = null, curV = null, curA = null, sbSegs = [], audioStall = false, syncTimer = 0, watchAbort;
+let kind = "yt", hls = null, retried = false, retryTimer = 0, cur = null, curV = null, curA = null, sbSegs = [], audioStall = false, syncTimer = 0, watchAbort;
 const audioMode = () => kind === "yt" && prefs.audioOnly;
 const split = () => kind === "yt" && !prefs.audioOnly;
 const master = () => audioMode() ? a : v;
@@ -897,6 +897,8 @@ function beginWatch(k, extHref, extText, poster) {
   listAbort?.abort();
   watchAbort?.abort(); watchAbort = new AbortController();
   stopPlayback(); cur = null; sbSegs = []; kind = k;
+  retried = false;
+  if (retryTimer) { clearTimeout(retryTimer); retryTimer = 0; }
   setSource(k);
   watch.classList.toggle("mx", k === "mx");
   watch.classList.toggle("sony", k === "sony");
@@ -1135,7 +1137,7 @@ onV("play", () => { if (!split()) return; alignAudio(); a.play().catch(() => {})
 onV("pause", () => { if (split() && !audioStall) a.pause(); });
 onV("seeking", () => { if (split()) a.currentTime = v.currentTime; });
 onV("waiting", () => { if (split()) a.pause(); stage.classList.add("loading"); });
-onV("playing", () => { retried = false; stage.classList.remove("loading"); if (split()) { alignAudio(); a.play().catch(() => {}); } });
+onV("playing", () => { retried = false; unfreeze(); stage.classList.remove("loading"); if (split()) { alignAudio(); a.play().catch(() => {}); } });
 onV("ratechange", () => { a.playbackRate = v.playbackRate; });
 a.addEventListener("waiting", () => { if (split() && !v.paused) { audioStall = true; v.pause(); stage.classList.add("loading"); } });
 const audioReady = () => { if (audioStall) { audioStall = false; v.play().catch(() => {}); } else if (audioMode()) stage.classList.remove("loading"); };
@@ -1148,9 +1150,31 @@ onV("ended", () => {
 });
 for (const el of [...vids, a]) el.addEventListener("error", () => {
   if ((el !== v && el !== a) || kind !== "yt" || !el.getAttribute("src") || !cur) return; // hls.js handles its own errors
+  // If audio fails, try next available audio format first
+  if (el === a && cur.audios && cur.audios.length > 1) {
+    const idx = cur.audios.findIndex(x => x.id === curA?.id);
+    if (idx >= 0 && idx + 1 < cur.audios.length) {
+      curA = cur.audios[idx + 1];
+      setSrc(a, curA.url, master().currentTime);
+      a.play().catch(() => {});
+      return;
+    }
+  }
+  // Debounce simultaneous error events from video & audio elements
+  if (retryTimer) return;
   // Stream URLs expire / get IP-bound; re-resolve once with a fresh extraction.
-  if (!retried) { retried = true; toast("Stream refresh ho raha hai…"); savePos(); openVideo(cur.id, true); }
-  else { stage.classList.remove("loading"); toast("Playback error"); }
+  if (!retried) {
+    retried = true;
+    toast("Stream refresh ho raha hai…");
+    savePos();
+    retryTimer = setTimeout(() => {
+      retryTimer = 0;
+      openVideo(cur.id, true);
+    }, 150);
+  } else {
+    stage.classList.remove("loading");
+    toast("Playback error");
+  }
 });
 const onTime = () => {
   const el = master();
@@ -1205,7 +1229,14 @@ async function switchVideo() {
   curV = f; setQLabel(f.height + "p");
   // Paused, or the element itself is fullscreen / picture-in-picture (can't be swapped
   // out without leaving that mode): reload in place instead.
-  if (v.paused && !audioStall || v.webkitDisplayingFullscreen || document.pictureInPictureElement === v) return reloadVideo(f);
+  const isFs = Boolean(
+    document.fullscreenElement ||
+    document.webkitFullscreenElement ||
+    document.mozFullScreenElement ||
+    document.msFullscreenElement ||
+    v.webkitDisplayingFullscreen
+  );
+  if (v.paused && !audioStall || isFs || document.pictureInPictureElement === v) return reloadVideo(f);
   const nv = vids.find(x => x !== v);
   nv.muted = true; nv.playbackRate = prefs.speed;
   try {
@@ -1251,8 +1282,15 @@ function reloadVideo(f) {
   freezeFrame();
   setSrc(v, f.url, t); if (playing) v.play().catch(() => {});
   // The new stream seeks to t (or just loads at 0); reveal it on its first painted frame.
-  const reveal = () => v.requestVideoFrameCallback ? v.requestVideoFrameCallback(unfreeze) : unfreeze();
+  const reveal = () => {
+    v.removeEventListener("seeked", reveal);
+    v.removeEventListener("loadeddata", reveal);
+    v.removeEventListener("playing", reveal);
+    if (v.requestVideoFrameCallback) v.requestVideoFrameCallback(unfreeze);
+    else unfreeze();
+  };
   v.addEventListener(t > 0 ? "seeked" : "loadeddata", reveal, { once: true });
+  v.addEventListener("playing", reveal, { once: true });
 }
 // Changing quality reloads the <video>, which would flash black. Paint the current frame
 // onto a canvas over it until the new stream has a frame of its own.
@@ -1264,7 +1302,7 @@ function freezeFrame() {
   c.width = Math.round(w * k); c.height = Math.round(h * k);
   try { c.getContext("2d").drawImage(v, 0, 0, c.width, c.height); } catch { return; }
   stage.classList.add("switching");
-  clearTimeout(freezeT); freezeT = setTimeout(unfreeze, 8000); // never leave a stale frame up
+  clearTimeout(freezeT); freezeT = setTimeout(unfreeze, 3000); // never leave a stale frame up
 }
 function unfreeze() { clearTimeout(freezeT); stage.classList.remove("switching"); }
 $("codec").addEventListener("change", e => { prefs.codec = e.target.value; savePrefs(); if (cur && split()) { switchVideo(); fillQuality(cur); } });
