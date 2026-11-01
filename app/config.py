@@ -5,9 +5,9 @@ import sys
 # Project root directory
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-# Ensure vendored yt-dlp is available in sys.path
+# Ensure vendored yt-dlp is available in sys.path if present
 VENDOR_YTDLP = os.path.join(ROOT, "vendor", "yt-dlp")
-if VENDOR_YTDLP not in sys.path:
+if os.path.exists(VENDOR_YTDLP) and VENDOR_YTDLP not in sys.path:
     sys.path.insert(0, VENDOR_YTDLP)
 
 # Server & Network Configuration (Local defaults)
@@ -64,3 +64,11 @@ if YT_COOKIES and os.path.isfile(YT_COOKIES):
 
 # Static files directory
 STATIC_DIR = os.path.join(ROOT, "static")
+if not os.path.isdir(STATIC_DIR):
+    for candidate in [
+        os.path.join(os.path.dirname(__file__), "..", "static"),
+        os.path.join(os.path.dirname(__file__), "static"),
+    ]:
+        if os.path.isdir(candidate):
+            STATIC_DIR = os.path.abspath(candidate)
+            break
