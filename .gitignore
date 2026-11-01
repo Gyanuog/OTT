@@ -3,6 +3,9 @@
 .codex/
 __pycache__/
 *.py[cod]
+*$py.class
 www.youtube.com_cookies.txt
 *.log
 .env
+.wrangler/
+.DS_Store
