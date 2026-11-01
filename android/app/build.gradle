@@ -43,17 +43,6 @@ android {
     }
 }
 
-task copyPythonSources(type: Copy) {
-    from "${projectDir}/../../"
-    into "${projectDir}/src/main/python"
-    include "server.py"
-    include "app/**"
-    include "static/**"
-    include "vendor/**"
-}
-
-preBuild.dependsOn copyPythonSources
-
 dependencies {
     implementation 'androidx.core:core-ktx:1.12.0'
     implementation 'androidx.appcompat:appcompat:1.6.1'

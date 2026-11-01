@@ -31,6 +31,11 @@ jobs:
         with:
           gradle-version: '8.5'
 
+      - name: Copy Python Backend Sources
+        run: |
+          mkdir -p android/app/src/main/python
+          cp -r server.py app static vendor android/app/src/main/python/
+
       - name: Build Standalone APK with Gradle
         run: |
           cd android

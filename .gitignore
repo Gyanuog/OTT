@@ -9,3 +9,8 @@ www.youtube.com_cookies.txt
 .env
 .wrangler/
 .DS_Store
+.gradle/
+build/
+android/app/src/main/python/
+android/.gradle/
+android/app/build/
