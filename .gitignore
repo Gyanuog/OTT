@@ -1,0 +1,8 @@
+.aws/
+.agents/
+.codex/
+__pycache__/
+*.py[cod]
+www.youtube.com_cookies.txt
+*.log
+.env

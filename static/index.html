@@ -1,0 +1,1274 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="referrer" content="no-referrer">
+<meta name="color-scheme" content="light dark">
+<title>Local Tube</title>
+<link rel="preconnect" href="https://i.ytimg.com">
+<link rel="preconnect" href="https://qqcdnpictest.mxplay.com">
+<link rel="preconnect" href="https://d3sgzbosmwirao.cloudfront.net" crossorigin>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23e5254a'/%3E%3Cpath d='M12 9.5v13l11-6.5z' fill='white'/%3E%3C/svg%3E">
+<style>
+:root{
+  --bg:#ffffff;--surface:#f5f5f7;--surface-2:#ebebee;--elev:#ffffff;--fg:#0e0e10;--fg-2:#3a3a40;--muted:#6e6e78;
+  --line:#e7e7eb;--accent:#e5254a;--accent-soft:rgba(229,37,74,.1);--shadow:0 8px 30px rgba(15,15,20,.12);
+  --scrim:rgba(0,0,0,.72);--radius:14px;--radius-sm:10px;color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0b0b0d;--surface:#151518;--surface-2:#202025;--elev:#1a1a1e;--fg:#f4f4f6;--fg-2:#d0d0d6;--muted:#9a9aa5;
+  --line:#26262c;--accent:#ff4d6d;--accent-soft:rgba(255,77,109,.14);--shadow:0 10px 34px rgba(0,0,0,.5);color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0b0b0d;--surface:#151518;--surface-2:#202025;--elev:#1a1a1e;--fg:#f4f4f6;--fg-2:#d0d0d6;--muted:#9a9aa5;
+  --line:#26262c;--accent:#ff4d6d;--accent-soft:rgba(255,77,109,.14);--shadow:0 10px 34px rgba(0,0,0,.5);color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.5 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+button,select,input{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.i{width:20px;height:20px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.i.sm{width:16px;height:16px}.i.fill{fill:currentColor;stroke:none}
+
+/* ---------- header ---------- */
+.top{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:16px;height:60px;padding:0 20px;background:color-mix(in srgb,var(--bg) 86%,transparent);backdrop-filter:saturate(1.6) blur(14px);-webkit-backdrop-filter:saturate(1.6) blur(14px);border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:16px;letter-spacing:-.01em;white-space:nowrap}
+.mark{display:grid;place-items:center;width:30px;height:30px;border-radius:9px;background:var(--accent);color:#fff}
+.mark .i{width:14px;height:14px}
+.search{flex:1;min-width:0;max-width:640px;margin:0 auto;display:flex;align-items:center;height:42px;background:var(--surface);border:1px solid transparent;border-radius:999px;padding:4px;transition:border-color .15s,background .15s}
+.search:focus-within{border-color:var(--accent);background:var(--bg)}
+.seg{display:flex;background:var(--surface-2);border-radius:999px;padding:3px;flex:none}
+.seg button{border:0;background:none;border-radius:999px;padding:4px 12px;font-size:12.5px;font-weight:600;color:var(--muted);transition:background .15s,color .15s}
+.seg button[aria-selected="true"]{background:var(--elev);color:var(--fg);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.search .i{margin:0 4px 0 12px;color:var(--muted)}
+.search input{flex:1;min-width:0;height:100%;border:0;background:none;outline:none;padding:0 6px}
+.search kbd{font:600 11px/1 ui-monospace,monospace;color:var(--muted);border:1px solid var(--line);border-radius:6px;padding:4px 7px;margin-right:6px}
+.search:focus-within kbd{display:none}
+.actions{display:flex;gap:4px;flex:none}
+.icon-btn{display:grid;place-items:center;width:38px;height:38px;border:0;border-radius:999px;background:none;color:var(--fg-2);transition:background .15s,color .15s}
+.icon-btn:hover{background:var(--surface)}
+.icon-btn[aria-pressed="true"]{background:var(--accent-soft);color:var(--accent)}
+
+/* ---------- layout & sections ---------- */
+main{max-width:1440px;margin:0 auto;padding:24px 20px 64px}
+.sec{margin-bottom:36px}
+.sec-h{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:0 0 14px}
+.sec-h h2{margin:0;font-size:18px;letter-spacing:-.01em}
+.sec-h .m{font-size:13px}
+.link-btn{border:0;background:none;color:var(--muted);font-size:13px;padding:4px 8px 4px 0}
+.link-btn:hover{color:var(--fg)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:24px 16px}
+.row{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(250px,300px);gap:16px;overflow-x:auto;padding-bottom:6px;scroll-snap-type:x mandatory;scrollbar-width:thin}
+.row>*{scroll-snap-align:start}
+.row .card{content-visibility:visible}
+.m{color:var(--muted)}
+
+/* ---------- cards ---------- */
+.card{display:block;content-visibility:auto;contain-intrinsic-size:auto 260px;border-radius:var(--radius)}
+.thumb{position:relative;aspect-ratio:16/9;border-radius:var(--radius);overflow:hidden;background:var(--surface-2)}
+.thumb img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .35s ease}
+.card:hover .thumb img{transform:scale(1.04)}
+.chip{position:absolute;bottom:8px;display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:600;line-height:1;padding:4px 6px;border-radius:6px;background:var(--scrim);color:#fff;letter-spacing:.01em}
+.chip .i{width:12px;height:12px}
+.chip.dur{right:8px}.chip.tag{left:8px;top:8px;bottom:auto}
+.chip.live{background:var(--accent)}
+.card .t{margin:10px 2px 3px;font-weight:600;font-size:14.5px;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.card .s{margin:0 2px;font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.locked .thumb img{filter:grayscale(.6) brightness(.7)}
+
+/* skeletons */
+.sk{background:linear-gradient(90deg,var(--surface) 0%,var(--surface-2) 50%,var(--surface) 100%);background-size:200% 100%;animation:sh 1.2s ease-in-out infinite;border-radius:8px}
+@keyframes sh{to{background-position:-200% 0}}
+.sk-card .thumb{background:none}.sk-line{height:12px;margin:10px 2px 0}
+
+/* home: hero carousel */
+.feat{position:relative;overflow:hidden;border-radius:20px;margin-bottom:36px;background:#0b0b0d;color:#fff;aspect-ratio:16/6;min-height:340px;isolation:isolate}
+.slide{position:absolute;inset:0;opacity:0;visibility:hidden;transition:opacity .7s ease,visibility .7s}
+.slide.on{opacity:1;visibility:visible}
+.slide>img.bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center right;z-index:-1;transform:scale(1.03);transition:transform 7s ease-out}
+.slide.on>img.bg{transform:scale(1)}
+.slide::before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,rgba(8,8,10,.92) 0%,rgba(8,8,10,.7) 32%,rgba(8,8,10,0) 66%),linear-gradient(0deg,rgba(8,8,10,.6),transparent 40%)}
+.slide-in{position:absolute;left:44px;bottom:44px;max-width:min(520px,48%)}
+.slide .logo{display:block;max-width:300px;max-height:120px;object-fit:contain;object-position:left bottom;margin-bottom:14px}
+.slide h1{margin:0 0 10px;font-size:clamp(26px,3.2vw,42px);line-height:1.05;letter-spacing:-.02em}
+.slide p{margin:0 0 20px;color:rgba(255,255,255,.8);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.dots{position:absolute;right:28px;bottom:28px;display:flex;gap:6px}
+.dots button{width:8px;height:8px;padding:0;border:0;border-radius:999px;background:rgba(255,255,255,.4);transition:width .25s,background .25s}
+.dots button.on{width:24px;background:#fff}
+
+/* home: rows with arrows */
+.arrows{display:flex;gap:6px}
+.arrows button{display:grid;place-items:center;width:32px;height:32px;border:1px solid var(--line);border-radius:999px;background:var(--bg);color:var(--fg-2);transition:background .15s}
+.arrows button:hover{background:var(--surface)}
+.row{scrollbar-width:none}.row::-webkit-scrollbar{display:none}
+.row.posters{grid-auto-columns:minmax(150px,170px);gap:14px}
+.pcard{display:block}
+.pcard .thumb{aspect-ratio:2/3;border-radius:12px}
+.pcard .t{margin:8px 2px 1px;font-weight:600;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pcard .s{margin:0 2px;font-size:12px;color:var(--muted)}
+.pcard:hover .thumb img{transform:scale(1.05)}
+.cats{display:flex;gap:8px;overflow-x:auto;margin:0 0 22px;scrollbar-width:none}
+.cats::-webkit-scrollbar{display:none}
+.sk-row{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(250px,300px);gap:16px;overflow:hidden}
+.sk-row.posters{grid-auto-columns:minmax(150px,170px);gap:14px}
+.sk-row .sk{aspect-ratio:16/9;border-radius:var(--radius)}.sk-row.posters .sk{aspect-ratio:2/3;border-radius:12px}
+.sentinel{height:1px}
+
+/* empty / welcome */
+.empty{display:grid;place-items:center;text-align:center;padding:72px 16px;color:var(--muted)}
+.empty h1{margin:18px 0 6px;color:var(--fg);font-size:26px;letter-spacing:-.02em}
+.empty .mark{width:56px;height:56px;border-radius:16px}.empty .mark .i{width:24px;height:24px}
+.sugg{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:22px}
+.pill{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--bg);border-radius:999px;padding:7px 14px;font-size:13px;font-weight:500;color:var(--fg-2);white-space:nowrap;transition:background .15s,border-color .15s}
+.pill:hover{background:var(--surface);border-color:var(--surface-2)}
+.pill.on{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.err{color:var(--accent)}
+
+/* ---------- MX show page ---------- */
+.hero{position:relative;overflow:hidden;border-radius:20px;margin-bottom:28px;background:#000;color:#fff;isolation:isolate}
+.hero .bd{position:absolute;inset:0;background:center/cover no-repeat;filter:blur(28px) saturate(1.3);opacity:.55;transform:scale(1.15);z-index:-2}
+.hero::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(0,0,0,.85) 0%,rgba(0,0,0,.45) 60%,rgba(0,0,0,.2));z-index:-1}
+.hero-in{display:flex;gap:28px;align-items:center;padding:28px}
+.hero img.poster{width:min(420px,42%);aspect-ratio:16/9;object-fit:cover;border-radius:14px;box-shadow:0 20px 50px rgba(0,0,0,.5)}
+.eyebrow{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.7)}
+.hero h1{margin:6px 0 10px;font-size:clamp(24px,3.4vw,40px);line-height:1.1;letter-spacing:-.02em}
+.hero p{margin:0 0 20px;max-width:62ch;color:rgba(255,255,255,.82);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.btns{display:flex;flex-wrap:wrap;gap:10px}
+.btn{display:inline-flex;align-items:center;gap:8px;height:42px;padding:0 18px;border-radius:999px;border:0;font-weight:600;font-size:14px;background:rgba(255,255,255,.16);color:#fff;backdrop-filter:blur(6px)}
+.btn:hover{background:rgba(255,255,255,.24)}
+.btn.primary{background:#fff;color:#0e0e10}.btn.primary:hover{background:#e9e9ee}
+.tabs{display:flex;gap:6px;overflow-x:auto;margin:0 0 18px;padding-bottom:2px}
+.eplist{display:grid;gap:8px}
+.ep{display:grid;grid-template-columns:200px 1fr;gap:16px;align-items:center;padding:10px;border-radius:var(--radius);transition:background .15s}
+.ep:hover{background:var(--surface)}
+.ep .thumb{border-radius:var(--radius-sm)}
+.ep .no{font-size:12px;font-weight:700;color:var(--accent);letter-spacing:.04em}
+.ep .t{margin:2px 0 4px;font-weight:600;font-size:15px}
+.ep .s{font-size:13px}
+.ep .d{max-width:78ch;margin:6px 0 0;font-size:13px;color:var(--muted);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+
+/* ---------- watch page ---------- */
+#watch{display:none;grid-template-columns:minmax(0,1fr) 380px;gap:28px;max-width:1600px;margin:0 auto;padding:20px 20px 64px}
+.stage{position:relative;isolation:isolate;background:#000;border-radius:var(--radius);overflow:hidden;aspect-ratio:16/9;box-shadow:var(--shadow)}
+.stage video{width:100%;height:100%;display:block;background:#000;object-fit:contain}
+.stage.fill video{object-fit:cover}
+.stage video.standby{position:absolute;inset:0;z-index:-1;pointer-events:none}
+.stage .freeze{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;pointer-events:none;display:none}
+.stage.fill .freeze{object-fit:cover}
+.stage.switching .freeze{display:block}
+.zoomhint{position:absolute;left:50%;top:18px;transform:translateX(-50%);background:rgba(0,0,0,.7);color:#fff;font-size:13px;font-weight:600;padding:6px 12px;border-radius:999px;opacity:0;transition:opacity .2s;pointer-events:none}
+.zoomhint.show{opacity:1}
+.stage .poster{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:blur(3px) brightness(.5);display:none}
+.stage audio{position:absolute;left:20px;right:20px;bottom:20px;width:calc(100% - 40px);display:none}
+.stage.audio-mode video{display:none}.stage.audio-mode .poster,.stage.audio-mode audio{display:block}
+.spin{position:absolute;inset:0;display:none;place-items:center;pointer-events:none}
+.spin::after{content:"";width:44px;height:44px;border-radius:50%;border:3px solid rgba(255,255,255,.25);border-top-color:#fff;animation:rot .8s linear infinite}
+@keyframes rot{to{transform:rotate(360deg)}}
+.stage.loading .spin{display:grid}
+#wtitle{margin:16px 0 4px;font-size:20px;line-height:1.3;letter-spacing:-.01em}
+.wmeta{font-size:13.5px;color:var(--muted)}
+.toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:14px 0}
+.tb{display:inline-flex;align-items:center;gap:8px;height:38px;padding:0 14px;border:0;border-radius:999px;background:var(--surface);color:var(--fg-2);font-weight:500;font-size:13.5px;transition:background .15s}
+.tb:hover{background:var(--surface-2)}
+.tb.icon{width:38px;padding:0;justify-content:center}
+.vol{display:inline-flex;align-items:center;gap:4px;height:38px;padding:0 12px 0 0;background:var(--surface);border-radius:999px}
+.vol .tb{background:none}
+.vol input{width:96px;accent-color:var(--accent)}
+.sp{flex:1}
+.menu-wrap{position:relative}
+.menu{position:absolute;right:0;bottom:calc(100% + 8px);z-index:10;width:270px;padding:8px;background:var(--elev);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);display:none}
+.menu.open{display:block}
+.menu label{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 10px;border-radius:8px;font-size:13.5px}
+.menu label:hover{background:var(--surface)}
+.menu select{border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:5px 8px;font-size:13px;max-width:150px}
+.switch{appearance:none;width:36px;height:20px;border-radius:999px;background:var(--surface-2);position:relative;cursor:pointer;transition:background .15s;margin:0}
+.switch::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.3);transition:transform .15s}
+.switch:checked{background:var(--accent)}.switch:checked::after{transform:translateX(16px)}
+#watch.mx .yt-only, #watch.sony .yt-only{display:none}
+.chap{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 14px}
+.chap:empty{display:none}
+.desc{position:relative;background:var(--surface);border-radius:var(--radius);padding:14px 16px;white-space:pre-wrap;word-break:break-word;font-size:13.5px;color:var(--fg-2);max-height:6.6em;overflow:hidden;cursor:pointer}
+.desc:empty{display:none}
+.desc:not(.open)::after{content:"";position:absolute;left:0;right:0;bottom:0;height:2.4em;background:linear-gradient(transparent,var(--surface))}
+.desc.open{max-height:none}
+.side h3{margin:0 0 12px;font-size:15px}
+.side h3:empty{display:none}
+.side-list{display:grid;gap:4px;max-height:calc(100vh - 140px);overflow-y:auto;scrollbar-width:thin}
+.mini{display:grid;grid-template-columns:168px 1fr;gap:12px;padding:6px;border-radius:var(--radius-sm);transition:background .15s}
+.mini:hover{background:var(--surface)}
+.mini.cur{background:var(--accent-soft)}
+.mini .thumb{border-radius:8px}
+.mini .chip{bottom:5px;font-size:11px;padding:3px 5px}
+.mini .chip.dur{right:5px}
+.mini .t{margin:0 0 4px;font-weight:600;font-size:13.5px;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.mini .s{font-size:12.5px;color:var(--muted)}
+
+.toast{position:fixed;left:50%;bottom:28px;transform:translate(-50%,8px);background:var(--fg);color:var(--bg);font-weight:500;padding:10px 16px;border-radius:999px;opacity:0;transition:opacity .2s,transform .2s;pointer-events:none;z-index:50;box-shadow:var(--shadow)}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+@media (max-width:1100px){#watch{grid-template-columns:1fr}.side{margin-top:8px}.side-list{max-height:none}}
+@media (max-width:720px){
+  .top{gap:8px;padding:0 12px}.brand .name{display:none}
+  .search kbd,.search .i{display:none}.search input{padding-left:10px}
+  .seg button{padding:4px 9px}.seg .long{display:none}
+  .actions{gap:0}
+  main,#watch{padding-left:12px;padding-right:12px}
+  .grid{grid-template-columns:1fr}
+  .hero-in{flex-direction:column;align-items:stretch;padding:18px}.hero img.poster{width:100%}
+  .ep{grid-template-columns:130px 1fr;gap:12px;padding:6px}.ep .d{display:none}
+  .mini{grid-template-columns:140px 1fr}
+  .actions .icon-btn{width:34px;height:34px}
+  .feat{aspect-ratio:4/5;min-height:0;border-radius:16px;margin-bottom:28px}
+  .slide>img.bg{object-position:center top}
+  .slide::before{background:linear-gradient(0deg,rgba(8,8,10,.95) 0%,rgba(8,8,10,.6) 40%,rgba(8,8,10,0) 70%)}
+  .slide-in{left:18px;right:18px;bottom:44px;max-width:none}
+  .slide .logo{max-width:220px;max-height:90px}
+  .dots{left:18px;right:auto;bottom:18px}
+  .arrows button[data-dir]{display:none}
+  .row{grid-auto-columns:78%}.row.posters{grid-auto-columns:38%}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4.5v15l12.5-7.5z"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7.5"/><path d="m20.5 20.5-4.2-4.2"/></symbol>
+  <symbol id="i-headphones" viewBox="0 0 24 24"><path d="M3 14h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a9 9 0 0 1 18 0v7a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3"/></symbol>
+  <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M6.3 17.7l-1.4 1.4M19.1 4.9l-1.4 1.4"/></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></symbol>
+  <symbol id="i-logout" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></symbol>
+  <symbol id="i-vol" viewBox="0 0 24 24"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14"/></symbol>
+  <symbol id="i-mute" viewBox="0 0 24 24"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="m22 9-6 6M16 9l6 6"/></symbol>
+  <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></symbol>
+  <symbol id="i-ext" viewBox="0 0 24 24"><path d="M15 3h6v6M10 14 21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></symbol>
+  <symbol id="i-next" viewBox="0 0 24 24"><path d="m5 4 10 8-10 8zM19 5v14"/></symbol>
+  <symbol id="i-prev" viewBox="0 0 24 24"><path d="m19 20-10-8 10-8zM5 19V5"/></symbol>
+  <symbol id="i-list" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></symbol>
+  <symbol id="i-left" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></symbol>
+  <symbol id="i-right" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></symbol>
+</svg>
+
+<header class="top">
+  <a class="brand" href="#/" aria-label="Home"><span class="mark"><svg class="i fill"><use href="#i-play"/></svg></span><span class="name">Local Tube</span></a>
+  <form id="sf" class="search" role="search">
+    <div class="seg" role="tablist" aria-label="Source">
+      <button type="button" role="tab" data-src="yt">YouTube</button><button type="button" role="tab" data-src="mx">MX<span class="long"> Player</span></button><button type="button" role="tab" data-src="sony">Sony<span class="long"> LIV</span></button>
+    </div>
+    <svg class="i sm"><use href="#i-search"/></svg>
+    <input id="q" autocomplete="off" enterkeyhint="search" aria-label="Search">
+    <kbd>/</kbd>
+  </form>
+  <div class="actions">
+    <button class="icon-btn" id="audioOnly" aria-pressed="false" title="Audio only (YouTube) — sabse kam data/CPU"><svg class="i"><use href="#i-headphones"/></svg></button>
+    <button class="icon-btn" id="theme" title="Theme"><svg class="i"><use href="#i-moon"/></svg></button>
+    <a class="icon-btn" id="logout" href="/logout" title="Logout" hidden><svg class="i"><use href="#i-logout"/></svg></a>
+  </div>
+</header>
+
+<main id="list"></main>
+
+<section id="watch">
+  <div class="primary">
+    <div class="stage" id="stage">
+      <video id="v" controls playsinline preload="auto"></video>
+      <video id="v2" class="standby" playsinline muted preload="auto"></video>
+      <canvas class="freeze" id="freeze"></canvas>
+      <img class="poster" id="poster" alt="">
+      <audio id="a" preload="auto"></audio>
+      <div class="spin"></div>
+      <div class="zoomhint" id="zoomhint"></div>
+    </div>
+    <h1 id="wtitle"></h1>
+    <div class="wmeta" id="wmeta"></div>
+    <div class="toolbar">
+      <div class="vol">
+        <button class="tb icon" id="mute" title="Mute (m)"><svg class="i sm"><use href="#i-vol"/></svg></button>
+        <input type="range" id="vol" min="0" max="1" step="0.02" aria-label="Volume">
+      </div>
+      <span class="sp"></span>
+      <div class="menu-wrap">
+        <button class="tb" id="settingsBtn" aria-haspopup="true" aria-expanded="false"><svg class="i sm"><use href="#i-sliders"/></svg><span id="qLabel">Auto</span></button>
+        <div class="menu" id="settings" role="menu">
+          <label>Quality <select id="quality"></select></label>
+          <label class="yt-only">Codec <select id="codec">
+            <option value="vp9">VP9 · GPU</option><option value="h264">H.264 · GPU</option><option value="av1">AV1 · CPU heavy</option><option value="any">Any codec</option>
+          </select></label>
+          <label>Speed <select id="speed">
+            <option>0.5</option><option>0.75</option><option value="1" selected>Normal</option><option>1.25</option><option>1.5</option><option>1.75</option><option>2</option>
+          </select></label>
+          <label class="yt-only">SponsorBlock <input type="checkbox" class="switch" id="sb"></label>
+        </div>
+      </div>
+      <a class="tb" id="extlink" target="_blank" rel="noopener noreferrer"><svg class="i sm"><use href="#i-ext"/></svg><span></span></a>
+    </div>
+    <div class="chap" id="chapters"></div>
+    <div class="desc" id="desc" title="Click to expand"></div>
+  </div>
+  <aside class="side">
+    <h3 id="sideTitle"></h3>
+    <div class="side-list" id="side"></div>
+  </aside>
+</section>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+"use strict";
+const $ = id => document.getElementById(id);
+// Two <video> elements: `v` is the one on screen; the other stands by underneath so a
+// quality switch can load there while the current picture keeps playing.
+const vids = [$("v"), $("v2")], a = $("a"), stage = $("stage");
+let v = vids[0];
+// Listen on both video elements but only react to the one currently on screen.
+const onV = (type, fn) => { for (const el of vids) el.addEventListener(type, e => { if (e.currentTarget === v) fn(e); }); };
+const store = {
+  get(k, d) { try { const x = localStorage.getItem("lt:" + k); return x === null ? d : JSON.parse(x); } catch { return d; } },
+  set(k, x) { try { localStorage.setItem("lt:" + k, JSON.stringify(x)); } catch {} },
+};
+// Earlier versions kept watch history and resume positions; remove them for good.
+try {
+  for (const k of Object.keys(localStorage)) if (k === "lt:history" || k.startsWith("lt:pos:")) localStorage.removeItem(k);
+} catch {}
+const BEST = 99999; // "Best available" quality: highest resolution the chosen codec offers
+const DEFAULT_H = 1080; // fixed default; quality only changes when the user picks another
+const PREFS_VER = 3;
+const prefs = Object.assign({ codec: "vp9", maxH: DEFAULT_H, volume: 1, muted: false, audioOnly: false, sb: true, speed: 1, src: "yt", mxMaxH: DEFAULT_H, sonyMaxH: DEFAULT_H, theme: "auto" }, store.get("prefs", {}));
+if ((prefs.v || 1) < PREFS_VER) { Object.assign(prefs, { codec: "vp9", maxH: DEFAULT_H, mxMaxH: DEFAULT_H, v: PREFS_VER }); delete prefs.bw; store.set("prefs", prefs); }
+const savePrefs = () => store.set("prefs", prefs);
+
+// ---------- helpers ----------
+const fmtDur = s => { if (!s && s !== 0) return ""; s = Math.round(s); const h = s / 3600 | 0, m = (s % 3600) / 60 | 0, x = s % 60; return (h ? h + ":" + String(m).padStart(2, "0") : m) + ":" + String(x).padStart(2, "0"); };
+const fmtNum = n => n == null ? "" : n >= 1e9 ? (n / 1e9).toFixed(1) + "B" : n >= 1e6 ? (n / 1e6).toFixed(1) + "M" : n >= 1e3 ? (n / 1e3).toFixed(1) + "K" : String(n);
+const fmtDate = d => {
+  const m = String(d || "").match(/^(\d{4})-?(\d\d)-?(\d\d)/); if (!m) return "";
+  return new Date(+m[1], m[2] - 1, +m[3]).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
+};
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const icon = (name, cls = "sm") => `<svg class="i ${cls}"><use href="#i-${name}"/></svg>`;
+const ytThumb = id => `https://i.ytimg.com/vi/${id}/mqdefault.jpg`;
+let toastT;
+function toast(msg) { const t = $("toast"); t.textContent = msg; t.classList.add("show"); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove("show"), 2000); }
+async function api(path, signal) {
+  const r = await fetch(path, { signal });
+  if (r.status === 401) { location.href = "/login"; throw new Error("login required"); }
+  const j = await r.json().catch(() => ({ error: "HTTP " + r.status }));
+  if (!r.ok) throw new Error(j.error || "HTTP " + r.status);
+  return j;
+}
+
+// ---------- theme ----------
+const isDark = () => prefs.theme === "dark" || (prefs.theme === "auto" && matchMedia("(prefers-color-scheme: dark)").matches);
+function applyTheme() {
+  if (prefs.theme === "auto") delete document.documentElement.dataset.theme; else document.documentElement.dataset.theme = prefs.theme;
+  $("theme").innerHTML = icon(isDark() ? "sun" : "moon", "");
+}
+$("theme").addEventListener("click", () => { prefs.theme = isDark() ? "light" : "dark"; savePrefs(); applyTheme(); });
+
+// ---------- cards ----------
+// A card is { href, key, img, title, sub, dur, durS, tag, locked, ytId? } — shared by YouTube, MX and history.
+const ytCard = x => ({ href: "#/watch/" + x.id, key: x.id, ytId: x.id, img: ytThumb(x.id), title: x.title, durS: x.duration,
+  sub: [x.channel, x.views != null && fmtNum(x.views) + " views"].filter(Boolean).join(" · "), dur: x.live ? "LIVE" : fmtDur(x.duration) });
+const MX_LABEL = { tvshow: "Show", movie: "Movie", episode: "Episode", shorts: "Clip", season: "Season" };
+const mxHref = (type, id) => type === "tvshow" ? "#/mx/show/" + id : type === "season" ? "#/mx/season/" + id : `#/mx/watch/${type}/${id}`;
+function mxCard(x) {
+  const sub = x.type === "episode" ? [x.show, x.seq && "E" + x.seq, fmtDate(x.date)] : [MX_LABEL[x.type], fmtDate(x.date)];
+  return { href: mxHref(x.type, x.id), key: x.id, img: x.img, poster: x.poster, title: x.title, durS: x.duration, sub: sub.filter(Boolean).join(" · "),
+    dur: fmtDur(x.duration), tag: x.type === "tvshow" ? "Show" : "MX", locked: x.playable === false };
+}
+const keyOf = c => c.key || (c.href.match(/([0-9a-f]{32}|[A-Za-z0-9_-]{11})$/) || [])[1];
+const chips = c => (c.locked ? `<span class="chip tag">${icon("lock")} Locked</span>` : c.tag ? `<span class="chip tag">${esc(c.tag)}</span>` : "")
+  + (c.dur ? `<span class="chip dur${c.dur === "LIVE" ? " live" : ""}">${c.dur}</span>` : "");
+const imgTag = src => src ? `<img loading="lazy" decoding="async" src="${esc(src)}" alt="">` : "";
+function card(c) {
+  return `<a class="card${c.locked ? " locked" : ""}" href="${c.href}"${c.ytId ? ` data-id="${c.ytId}"` : ""}>
+    <div class="thumb">${imgTag(c.img)}${chips(c)}</div>
+    <div class="t">${esc(c.title)}</div><div class="s">${esc(c.sub || "")}</div></a>`;
+}
+const grid = items => `<div class="grid">${items.map(card).join("")}</div>`;
+const skeleton = (n = 8) => `<div class="grid">${Array.from({ length: n }, () => `<div class="card sk-card"><div class="thumb sk"></div><div class="sk sk-line" style="width:90%"></div><div class="sk sk-line" style="width:55%"></div></div>`).join("")}</div>`;
+function mini(c, isCur) {
+  return `<a class="mini${isCur ? " cur" : ""}${c.locked ? " locked" : ""}" href="${c.href}"${c.ytId ? ` data-id="${c.ytId}"` : ""}>
+    <div class="thumb">${imgTag(c.img)}${c.dur ? `<span class="chip dur">${c.dur}</span>` : ""}</div>
+    <div><div class="t">${esc(c.title)}</div><div class="s">${esc(c.sub || "")}</div></div></a>`;
+}
+const section = (title, body, extra = "") => `<section class="sec"><div class="sec-h"><h2>${title}</h2>${extra}</div>${body}</section>`;
+
+// ---------- list views ----------
+const list = $("list"), watch = $("watch");
+let listAbort, lastYtResults = [];
+function setSource(src) {
+  prefs.src = src; savePrefs();
+  for (const b of document.querySelectorAll(".seg button")) b.setAttribute("aria-selected", String(b.dataset.src === src));
+  $("q").placeholder = src === "mx" ? "Shows, movies ya MX link…" : src === "sony" ? "Shows ya Sony LIV link/ID…" : "Search ya YouTube link…";
+}
+// ---------- home ----------
+const YT_CATS = [["Trending", "trending videos india"], ["Music", "new hindi songs"], ["Comedy", "hindi comedy"], ["News", "hindi news today"],
+  ["Bhojpuri", "new bhojpuri song"], ["Cricket", "cricket highlights"], ["Tech", "tech news hindi"], ["Gaming", "gaming india"]];
+const MX_HOME_PAGES = 6;
+let mxHome = null;            // { rows, next, done } — kept across visits so Back is instant
+const ytCatCache = {};
+const skRow = (n, posters) => `<div class="sk-row${posters ? " posters" : ""}">${'<div class="sk"></div>'.repeat(n)}</div>`;
+const rowSec = (title, inner, cls = "", extra = "", id = "") =>
+  `<section class="sec"${id ? ` id="${id}"` : ""}><div class="sec-h"><h2>${title}</h2><div class="arrows">${extra}` +
+  `<button data-dir="-1" aria-label="Scroll left">${icon("left")}</button><button data-dir="1" aria-label="Scroll right">${icon("right")}</button></div></div>` +
+  `<div class="row ${cls}">${inner}</div></section>`;
+function posterCard(c) {
+  return `<a class="pcard${c.locked ? " locked" : ""}" href="${c.href}">
+    <div class="thumb">${imgTag(c.poster || c.img)}${c.locked ? `<span class="chip tag">${icon("lock")}</span>` : ""}</div>
+    <div class="t">${esc(c.title)}</div><div class="s">${esc(c.kind || "")}</div></a>`;
+}
+// Run fn once when el scrolls near the viewport; cancelled with the page's AbortSignal.
+function whenVisible(el, signal, fn, margin = "300px") {
+  const io = new IntersectionObserver(es => { if (es.some(e => e.isIntersecting)) fn(io); }, { rootMargin: margin });
+  io.observe(el); signal.addEventListener("abort", () => io.disconnect());
+  return io;
+}
+
+// YouTube and MX each get their own home; "#/" opens the one for the current source.
+// Nothing about what was watched is kept, so homes show only fresh content.
+function showHome(src = prefs.src) {
+  setSource(src);
+  document.title = (src === "mx" ? "MX Player" : src === "sony" ? "Sony LIV" : "YouTube") + " · Local Tube";
+  listAbort?.abort(); listAbort = new AbortController();
+  const signal = listAbort.signal;
+  if (src === "mx") {
+    list.innerHTML = `<div id="feat"></div><div id="mxRows"></div><div class="sentinel" id="more"></div>`;
+    renderMxHome(signal);
+  } else if (src === "sony") {
+    list.innerHTML = `<div id="feat"></div><div id="sonyRows"></div>`;
+    renderSonyHome(signal);
+  } else {
+    list.innerHTML = `<div class="cats" id="ytCats">${YT_CATS.map(([n], i) => `<button class="pill" data-i="${i}">${n}</button>`).join("")}</div>
+      <section class="sec"><div id="ytRow">${skeleton(8)}</div></section>`;
+    $("ytCats").addEventListener("click", e => { const b = e.target.closest("button[data-i]"); if (b) loadYtCat(+b.dataset.i, signal); });
+    loadYtCat(prefs.ytCat ?? 0, signal);
+  }
+}
+
+async function renderSonyHome(signal) {
+  $("sonyRows").innerHTML = skRow(6, true);
+  try {
+    const j = await api("/api/sony/home", signal);
+    renderSonyFeat(j.hero || [], signal);
+    $("sonyRows").innerHTML = (j.rows || []).map(r => rowSec(esc(r.title), r.items.map(x => posterCard({
+      href: "#/sony/show/" + x.id,
+      img: x.img,
+      poster: x.poster || x.img,
+      title: x.title,
+      sub: x.desc ? esc(x.desc.slice(0, 50)) + "…" : "",
+      kind: x.category || "Show"
+    })).join(""), "posters")).join("");
+  } catch (e) {
+    if (e.name !== "AbortError") $("sonyRows").innerHTML = `<div class="empty err">${esc(e.message)}</div>`;
+  }
+}
+
+function renderSonyFeat(items, signal) {
+  if (!items.length) { $("feat")?.remove(); return; }
+  $("feat").outerHTML = `<div class="feat" id="feat">${items.map((x, i) => `
+    <div class="slide${i ? "" : " on"}">
+      <img class="bg" src="${esc(x.banner || x.img)}" alt="" ${i ? 'loading="lazy"' : 'fetchpriority="high"'}>
+      <div class="slide-in">
+        <div class="eyebrow">Sony LIV · ${esc(x.category || "Featured Show")}</div>
+        <h1>${esc(x.title)}</h1>
+        <p>${esc(x.desc || "")}</p>
+        <div class="btns"><a class="btn primary" href="#/sony/show/${x.id}">${icon("play", "sm fill")} Dekho</a></div>
+      </div>
+    </div>`).join("")}
+    <div class="dots">${items.map((_, i) => `<button aria-label="Slide ${i + 1}"${i ? "" : ' class="on"'}></button>`).join("")}</div>
+  </div>`;
+  const feat = $("feat"), slides = feat.querySelectorAll(".slide"), dots = feat.querySelectorAll(".dots button");
+  let at = 0, paused = false;
+  const show = n => { at = (n + slides.length) % slides.length; slides.forEach((s, i) => s.classList.toggle("on", i === at)); dots.forEach((d, i) => d.classList.toggle("on", i === at)); };
+  dots.forEach((d, i) => d.addEventListener("click", () => show(i)));
+  feat.addEventListener("pointerenter", () => { paused = true; });
+  feat.addEventListener("pointerleave", () => { paused = false; });
+  const t = setInterval(() => { if (!paused && !document.hidden) show(at + 1); }, 7000);
+  signal.addEventListener("abort", () => clearInterval(t));
+}
+
+async function loadYtCat(i, signal) {
+  prefs.ytCat = i; savePrefs();
+  for (const b of $("ytCats").children) b.classList.toggle("on", +b.dataset.i === i);
+  const q = YT_CATS[i][1];
+  if (!ytCatCache[q]) $("ytRow").innerHTML = skeleton(8);
+  try {
+    const res = ytCatCache[q] ??= (await api("/api/search?q=" + encodeURIComponent(q), signal)).results;
+    if (prefs.ytCat !== i || signal.aborted) return;
+    lastYtResults = res; // watch page "Up next" continues from this row
+    $("ytRow").innerHTML = res.length ? grid(res.map(ytCard)) : '<div class="empty">Kuch nahi mila.</div>';
+  } catch (e) { if (e.name !== "AbortError") $("ytRow").innerHTML = `<div class="m err">${esc(e.message)}</div>`; }
+}
+
+async function renderMxHome(signal) {
+  if (!mxHome) {
+    $("mxRows").innerHTML = skRow(7, true);
+    try { const j = await api("/api/mx/home", signal); mxHome = { rows: j.rows, next: j.next, pages: 1, done: !j.next }; }
+    catch (e) {
+      if (e.name === "AbortError") return;
+      $("mxRows").innerHTML = "";
+      $("feat").outerHTML = `<div class="empty" id="feat"><div class="err">MX Player load nahi hua: ${esc(e.message)}</div></div>`;
+      return;
+    }
+  }
+  renderFeat(signal);
+  $("mxRows").innerHTML = mxHome.rows.slice(1).map(mxRow).join("");
+  let loading = false;
+  whenVisible($("more"), signal, async io => {
+    if (loading) return;
+    if (mxHome.done || mxHome.pages >= MX_HOME_PAGES) { io.disconnect(); return; }
+    loading = true;
+    try {
+      const j = await api("/api/mx/home?next=" + encodeURIComponent(mxHome.next), signal);
+      mxHome.rows.push(...j.rows); mxHome.next = j.next; mxHome.pages++; mxHome.done = !j.next;
+      $("mxRows").insertAdjacentHTML("beforeend", j.rows.map(mxRow).join(""));
+    } catch (e) { if (e.name !== "AbortError") io.disconnect(); }
+    loading = false;
+  }, "600px");
+}
+const mxRow = r => rowSec(esc(r.title), r.items.map(x => posterCard({ ...mxCard(x), kind: MX_LABEL[x.type] })).join(""), "posters");
+
+function renderFeat(signal) {
+  const items = (mxHome.rows[0]?.items || []).filter(x => x.banner).slice(0, 5);
+  if (!items.length) { $("feat").remove(); return; }
+  const go = x => x.type === "tvshow" ? "#/mx/show/" + x.id : mxHref(x.type, x.id);
+  $("feat").outerHTML = `<div class="feat" id="feat">${items.map((x, i) => `
+    <div class="slide${i ? "" : " on"}">
+      <img class="bg" src="${esc(x.banner)}" alt="" ${i ? 'loading="lazy"' : 'fetchpriority="high"'}>
+      <div class="slide-in">
+        <div class="eyebrow">${esc(mxHome.rows[0].title)} · ${MX_LABEL[x.type] || ""}</div>
+        ${x.logo ? `<img class="logo" src="${esc(x.logo)}" alt="${esc(x.title)}">` : `<h1>${esc(x.title)}</h1>`}
+        <p>${esc(x.desc || "")}</p>
+        <div class="btns"><a class="btn primary" href="${go(x)}">${icon("play", "sm fill")} ${x.type === "tvshow" ? "Watch now" : "Play"}</a></div>
+      </div>
+    </div>`).join("")}
+    <div class="dots">${items.map((_, i) => `<button aria-label="Slide ${i + 1}"${i ? "" : ' class="on"'}></button>`).join("")}</div></div>`;
+  const feat = $("feat"), slides = feat.querySelectorAll(".slide"), dots = feat.querySelectorAll(".dots button");
+  let at = 0, paused = false;
+  const show = n => { at = (n + slides.length) % slides.length; slides.forEach((s, i) => s.classList.toggle("on", i === at)); dots.forEach((d, i) => d.classList.toggle("on", i === at)); };
+  dots.forEach((d, i) => d.addEventListener("click", () => show(i)));
+  feat.addEventListener("pointerenter", () => { paused = true; });
+  feat.addEventListener("pointerleave", () => { paused = false; });
+  const t = setInterval(() => { if (!paused && !document.hidden) show(at + 1); }, 7000);
+  signal.addEventListener("abort", () => clearInterval(t));
+}
+// Row arrow buttons (home)
+list.addEventListener("click", e => {
+  const b = e.target.closest(".arrows button[data-dir]"); if (!b) return;
+  const row = b.closest(".sec").querySelector(".row"); if (!row) return;
+  row.scrollBy({ left: +b.dataset.dir * row.clientWidth * 0.85, behavior: "smooth" });
+});
+async function loadList(path, render, n) {
+  listAbort?.abort(); listAbort = new AbortController();
+  list.innerHTML = skeleton(n);
+  try { render(await api(path, listAbort.signal)); }
+  catch (e) { if (e.name !== "AbortError") list.innerHTML = `<div class="empty"><div class="err">${esc(e.message)}</div></div>`; }
+}
+const noResults = '<div class="empty"><h1>Kuch nahi mila</h1><div>Doosre shabd try karo.</div></div>';
+function showSearch(q) {
+  $("q").value = q; setSource("yt"); document.title = q + " · Local Tube";
+  loadList("/api/search?q=" + encodeURIComponent(q), j => {
+    if (j.direct) return location.replace("#/watch/" + j.direct);
+    lastYtResults = j.results;
+    list.innerHTML = j.results.length ? section(`Results for “${esc(q)}”`, grid(j.results.map(ytCard)), `<span class="m">${j.results.length} videos</span>`) : noResults;
+  });
+}
+function showMxSearch(q) {
+  $("q").value = q; setSource("mx"); document.title = q + " · Local Tube";
+  loadList("/api/mx/search?q=" + encodeURIComponent(q), j => {
+    if (j.direct) return location.replace(mxHref(j.direct.type, j.direct.id));
+    if (!j.results.length) { list.innerHTML = noResults; return; }
+    const groups = [["tvshow", "Shows"], ["movie", "Movies"], ["episode", "Episodes"], ["shorts", "Clips"], ["season", "Seasons"]];
+    list.innerHTML = groups.map(([t, label]) => {
+      const items = j.results.filter(x => x.type === t);
+      return items.length ? section(label, grid(items.map(mxCard))) : "";
+    }).join("");
+  });
+}
+
+// Episodes of the season being browsed / watched, ascending — drives Next/Prev, autoplay and the side list.
+let mxQueue = { seasonId: null, eps: [] };
+async function seasonEpisodes(seasonId, signal) {
+  if (mxQueue.seasonId === seasonId) return mxQueue.eps;
+  const j = await api("/api/mx/season?id=" + seasonId, signal);
+  mxQueue = { seasonId, eps: j.episodes };
+  return j.episodes;
+}
+function epRow(e) {
+  const c = mxCard(e);
+  return `<a class="ep${c.locked ? " locked" : ""}" href="${c.href}">
+    <div class="thumb">${imgTag(c.img)}${c.locked ? `<span class="chip tag">${icon("lock")}</span>` : ""}${c.dur ? `<span class="chip dur">${c.dur}</span>` : ""}</div>
+    <div><div class="no">EPISODE ${e.seq ?? ""}</div><div class="t">${esc(e.title)}</div>
+      <div class="s m">${[fmtDur(e.duration), fmtDate(e.date)].filter(Boolean).join(" · ")}</div>
+      ${e.desc ? `<p class="d">${esc(e.desc)}</p>` : ""}</div></a>`;
+}
+const renderEpisodes = (eps, el) => { el.innerHTML = eps.length ? `<div class="eplist">${[...eps].reverse().map(epRow).join("")}</div>` : '<div class="empty">Koi episode nahi.</div>'; };
+function showMxShow(id, seasonId) {
+  setSource("mx");
+  loadList("/api/mx/show?id=" + id, show => {
+    document.title = show.title + " · Local Tube";
+    list.innerHTML = `<div class="hero"><div class="bd" style="background-image:url('${esc(show.img || "")}')"></div>
+      <div class="hero-in">${show.img ? `<img class="poster" src="${esc(show.img)}" alt="">` : ""}
+        <div><div class="eyebrow">MX Player · Show</div><h1>${esc(show.title)}</h1><p>${esc(show.description || "")}</p>
+        <div class="btns" id="heroBtns"></div></div></div></div>
+      <div class="tabs" id="seasons">${show.seasons.map(s => `<button class="pill" data-id="${s.id}">${esc(s.title)}</button>`).join("")}</div>
+      <div id="eps"></div>`;
+    const pick = sid => {
+      for (const b of $("seasons").children) b.classList.toggle("on", b.dataset.id === sid);
+      $("eps").innerHTML = skeleton(4);
+      seasonEpisodes(sid, listAbort.signal).then(eps => {
+        renderEpisodes(eps, $("eps"));
+        const ok = eps.filter(e => e.playable !== false);
+        const latest = ok[ok.length - 1], first = ok[0];
+        const b = [];
+        if (latest) b.push(`<a class="btn primary" href="#/mx/watch/episode/${latest.id}">${icon("play", "sm fill")} Latest · E${latest.seq}</a>`);
+        if (first && first !== latest) b.push(`<a class="btn" href="#/mx/watch/episode/${first.id}">Start from E${first.seq}</a>`);
+        $("heroBtns").innerHTML = b.join("");
+      }, e => { if (e.name !== "AbortError") $("eps").innerHTML = `<div class="empty err">${esc(e.message)}</div>`; });
+      history.replaceState(null, "", `#/mx/show/${id}/${sid}`);
+    };
+    $("seasons").addEventListener("click", e => { const b = e.target.closest("button"); if (b) pick(b.dataset.id); });
+    if (show.seasons.length) pick(show.seasons.some(s => s.id === seasonId) ? seasonId : show.seasons[0].id);
+    else $("eps").innerHTML = '<div class="empty">Koi season nahi mila.</div>';
+  }, 1);
+}
+function showMxSeason(id) {
+  setSource("mx");
+  listAbort?.abort(); listAbort = new AbortController();
+  list.innerHTML = skeleton(4);
+  seasonEpisodes(id, listAbort.signal).then(eps => { list.innerHTML = section("Episodes", '<div id="eps"></div>'); renderEpisodes(eps, $("eps")); },
+    e => { if (e.name !== "AbortError") list.innerHTML = `<div class="empty err">${esc(e.message)}</div>`; });
+}
+function showSonySearch(q) {
+  $("q").value = q; setSource("sony"); document.title = q + " · Local Tube";
+  loadList("/api/sony/search?q=" + encodeURIComponent(q), j => {
+    if (j.direct) {
+      if (j.direct.type === "tvshow") return location.replace("#/sony/show/" + j.direct.id);
+      return location.replace("#/sony/watch/" + j.direct.id);
+    }
+    if (!j.results || !j.results.length) { list.innerHTML = noResults; return; }
+    list.innerHTML = section(`Results for “${esc(q)}”`, grid(j.results.map(x => ({
+      href: (x.type === "tvshow" || !x.type) ? "#/sony/show/" + x.id : "#/sony/watch/" + x.id,
+      img: x.img || x.poster,
+      title: x.title,
+      sub: x.desc ? x.desc.slice(0, 60) + "…" : "",
+      tag: x.type === "tvshow" || !x.type ? "Show" : "Video",
+    }))));
+  });
+}
+function showSonyShow(id, seasonId) {
+  setSource("sony");
+  loadList("/api/sony/show?id=" + id, show => {
+    document.title = show.title + " · Local Tube";
+    list.innerHTML = `<div class="hero">
+      ${show.bg ? `<div class="bd" style="background-image:url('${esc(show.bg)}')"></div>` : ""}
+      <div class="hero-in">
+        ${show.poster ? `<img class="poster" src="${esc(show.poster)}" alt="">` : ""}
+        <div>
+          <div class="eyebrow">Sony LIV · Show</div>
+          <h1>${esc(show.title)}</h1>
+          <p>${esc(show.description || "")}</p>
+          <div class="btns" id="heroBtns"></div>
+        </div>
+      </div>
+    </div>
+    <div class="tabs" id="seasons">${show.seasons.map(s => `<button class="pill" data-id="${s.id}">${esc(s.title)}</button>`).join("")}</div>
+    <div id="eps"></div>`;
+    const pick = sid => {
+      for (const b of $("seasons").children) b.classList.toggle("on", b.dataset.id === sid);
+      $("eps").innerHTML = skeleton(6);
+      api("/api/sony/season?id=" + sid, listAbort.signal).then(j => {
+        const eps = j.episodes || [];
+        $("eps").innerHTML = eps.length ? `<div class="eplist">${eps.map(e => `
+          <a class="ep" href="#/sony/watch/${e.id}">
+            <div class="thumb">${e.img ? imgTag(e.img) : '<div class="ph"><svg class="i lg fill"><use href="#i-play"/></svg></div>'}${e.duration ? `<span class="chip dur">${fmtDur(e.duration)}</span>` : ""}</div>
+            <div>
+              <div class="no">EPISODE ${e.seq ?? ""}</div>
+              <div class="t">${esc(e.title)}</div>
+              <div class="s m">${[fmtDur(e.duration), fmtDate(e.date)].filter(Boolean).join(" · ")}</div>
+              ${e.desc ? `<p class="d">${esc(e.desc)}</p>` : ""}
+            </div>
+          </a>
+        `).join("")}</div>` : '<div class="empty">Koi episode nahi mila.</div>';
+        const ok = eps.filter(e => e.playable !== false);
+        const latest = ok[ok.length - 1], first = ok[0];
+        const b = [];
+        if (latest) b.push(`<a class="btn primary" href="#/sony/watch/${latest.id}">${icon("play", "sm fill")} Latest · E${latest.seq}</a>`);
+        if (first && first !== latest) b.push(`<a class="btn" href="#/sony/watch/${first.id}">Start from E${first.seq}</a>`);
+        $("heroBtns").innerHTML = b.join("");
+      }).catch(e => {
+        if (e.name !== "AbortError") $("eps").innerHTML = `<div class="empty err">${esc(e.message)}</div>`;
+      });
+      history.replaceState(null, "", `#/sony/show/${id}/${sid}`);
+    };
+    $("seasons").addEventListener("click", e => { const b = e.target.closest("button"); if (b) pick(b.dataset.id); });
+    if (show.seasons.length) pick(show.seasons.some(s => s.id === seasonId) ? seasonId : show.seasons[show.seasons.length - 1].id);
+    else $("eps").innerHTML = '<div class="empty">Koi season nahi mila.</div>';
+  }, 1);
+}
+const onHome = () => /^#?\/?(yt|mx|sony)?$/.test(location.hash.replace(/^#\/?/, ""));
+for (const b of document.querySelectorAll(".seg button")) b.addEventListener("click", () => {
+  if (onHome()) location.hash = "#/" + b.dataset.src;
+  else { setSource(b.dataset.src); $("q").focus(); }
+});
+$("sf").addEventListener("submit", e => {
+  e.preventDefault(); const q = $("q").value.trim(); if (!q) return;
+  // A pasted link picks its own source regardless of the selector.
+  const src = /mxplayer\.in/.test(q) ? "mx" : /sonyliv\.com/.test(q) ? "sony" : /youtu\.?be/.test(q) ? "yt" : prefs.src;
+  location.hash = (src === "mx" ? "#/mx/search/" : src === "sony" ? "#/sony/search/" : "#/search/") + encodeURIComponent(q); $("q").blur();
+});
+
+// Prefetch YouTube links before the click so opening a video is a cache hit. Cards that
+// show up on screen are queued (the server resolves them one at a time); hovering or
+// pressing a card moves it to the front of the queue.
+const prefetched = new Set(), urgent = new Set();
+function prefetch(id, now) {
+  if (!/^[A-Za-z0-9_-]{11}$/.test(id || "")) return; // only YouTube ids (MX/Sony season pills also carry data-id)
+  if (now ? urgent.has(id) : prefetched.has(id)) return;
+  prefetched.add(id); if (now) urgent.add(id);
+  fetch(`/api/prefetch?id=${id}${now ? "&now=1" : ""}`).catch(() => {});
+}
+const seenIO = new IntersectionObserver(es => {
+  for (const e of es) if (e.isIntersecting) { seenIO.unobserve(e.target); prefetch(e.target.dataset.id); }
+}, { threshold: 0.6 });
+new MutationObserver(() => {
+  for (const el of document.querySelectorAll("[data-id]:not([data-pf])")) { el.dataset.pf = "1"; seenIO.observe(el); }
+}).observe(document.body, { childList: true, subtree: true });
+let hoverT;
+document.addEventListener("pointerover", e => {
+  const c = e.target.closest?.("[data-id]"); if (!c) return;
+  clearTimeout(hoverT); hoverT = setTimeout(() => prefetch(c.dataset.id, true), 80);
+});
+document.addEventListener("pointerout", () => clearTimeout(hoverT));
+document.addEventListener("pointerdown", e => { const c = e.target.closest?.("[data-id]"); if (c) prefetch(c.dataset.id, true); });
+
+// ---------- player ----------
+// YouTube: separate video + audio streams kept in sync. MX: one HLS stream via hls.js.
+let kind = "yt", hls = null, retried = false, cur = null, curV = null, curA = null, sbSegs = [], audioStall = false, syncTimer = 0, watchAbort;
+const audioMode = () => kind === "yt" && prefs.audioOnly;
+const split = () => kind === "yt" && !prefs.audioOnly;
+const master = () => audioMode() ? a : v;
+
+function playable(el, f) { return el.canPlayType(`${f.mime}; codecs="${f.codecs}"`) !== ""; }
+// Codecs allowed per preference, best-liked first. VP9 and H.264 both decode on the GPU here,
+// so either may be used; AV1 (CPU-heavy on this machine) only when asked for.
+const CODEC_ORDER = { vp9: ["vp9", "h264"], h264: ["h264", "vp9"], av1: ["av1", "vp9", "h264"], any: ["vp9", "av1", "h264"] };
+function videoPool(info) {
+  const order = CODEC_ORDER[prefs.codec] || CODEC_ORDER.vp9;
+  const ok = info.videos.filter(f => playable(v, f));
+  const allowed = ok.filter(f => order.includes(f.codec));
+  const pool = allowed.length ? allowed : ok;
+  // Highest resolution wins; the preferred codec only breaks ties at the same height.
+  const rank = f => (order.indexOf(f.codec) + 1) || 99;
+  return pool.sort((x, y) => y.height - x.height || rank(x) - rank(y) || y.fps - x.fps || y.tbr - x.tbr);
+}
+function pickVideo(info) {
+  const pool = videoPool(info);
+  return pool.find(f => f.height <= prefs.maxH) || pool[pool.length - 1] || null;
+}
+function pickAudio(info) { return info.audios.find(f => playable(a, f)) || null; }
+const setQLabel = t => { $("qLabel").textContent = t; };
+
+function fillQuality(info) {
+  const seen = new Set(), opts = [];
+  for (const f of videoPool(info)) { const k = f.height + (f.fps > 30 ? "p" + f.fps : "p"); if (!seen.has(k)) { seen.add(k); opts.push([f.height, k]); } }
+  const top = opts[0] ? ` (${opts[0][1]})` : "";
+  $("quality").innerHTML = `<option value="${BEST}">Best${top}</option>` + opts.map(([h, k]) => `<option value="${h}">${k}</option>`).join("");
+  $("quality").value = prefs.maxH === BEST || !curV ? String(BEST) : String(curV.height);
+  setQLabel(audioMode() ? "Audio" : curV ? curV.height + "p" : "");
+}
+
+function setSrc(el, url, t) {
+  el.src = url;
+  if (t > 0) el.addEventListener("loadedmetadata", () => { el.currentTime = t; }, { once: true });
+}
+
+function stopPlayback() {
+  clearInterval(syncTimer); unfreeze(); switchSeq++;
+  if (hls) { hls.destroy(); hls = null; }
+  if (dashPlayer) { dashPlayer.reset(); dashPlayer = null; }
+  for (const el of [...vids, a]) { el.pause(); el.removeAttribute("src"); el.load(); }
+}
+
+function beginWatch(k, extHref, extText, poster) {
+  list.style.display = "none"; watch.style.display = "grid"; window.scrollTo(0, 0);
+  listAbort?.abort();
+  watchAbort?.abort(); watchAbort = new AbortController();
+  stopPlayback(); cur = null; sbSegs = []; kind = k;
+  setSource(k);
+  watch.classList.toggle("mx", k === "mx");
+  watch.classList.toggle("sony", k === "sony");
+  stage.classList.add("loading"); stage.classList.toggle("audio-mode", audioMode());
+  $("poster").src = poster || "";
+  $("wtitle").textContent = ""; $("wmeta").textContent = ""; $("desc").textContent = ""; $("desc").classList.remove("open"); $("chapters").innerHTML = "";
+  $("extlink").href = extHref; $("extlink").querySelector("span").textContent = extText;
+  $("sideTitle").textContent = ""; $("side").innerHTML = "";
+  $("quality").innerHTML = ""; setQLabel(""); // no stale options from the previous title
+}
+// Position survives an in-page reload of the same title (audio-only toggle, stream refresh)
+// but lives only in memory: nothing about playback is ever written to storage.
+let memPos = null;
+function resumeAt(id) {
+  const t = memPos?.id === id ? memPos.t : 0;
+  memPos = null;
+  return t;
+}
+function renderSide(title, cards, curKey) {
+  $("sideTitle").textContent = cards.length ? title : "";
+  $("side").innerHTML = cards.map(c => mini(c, keyOf(c) === curKey)).join("");
+  const el = $("side").querySelector(".cur");
+  if (el) $("side").scrollTop = el.offsetTop - $("side").offsetTop - 8; // keep the page itself from scrolling
+}
+
+async function openVideo(id, fresh) {
+  beginWatch("yt", "https://www.youtube.com/watch?v=" + id, "YouTube", `https://i.ytimg.com/vi/${id}/hqdefault.jpg`);
+  const others = lastYtResults.filter(x => x.id !== id).map(ytCard);
+  renderSide("From your search", others, id);
+  if (prefs.sb) loadSponsorBlock(id, watchAbort.signal);
+  let info;
+  try { info = await api("/api/video?id=" + id + (fresh ? "&fresh=1" : ""), watchAbort.signal); }
+  catch (e) { if (e.name !== "AbortError") { stage.classList.remove("loading"); $("wtitle").innerHTML = `<span class="err">${esc(e.message)}</span>`; } return; }
+  cur = info;
+  document.title = info.title + " · Local Tube";
+  $("wtitle").textContent = info.title;
+  $("wmeta").textContent = [info.channel, info.views != null && fmtNum(info.views) + " views", fmtDate(info.upload_date)].filter(Boolean).join(" · ");
+  $("desc").textContent = info.description || "";
+  $("chapters").innerHTML = info.chapters.map(c => `<button class="pill" data-t="${c.start}">${fmtDur(c.start)} · ${esc(c.title)}</button>`).join("");
+  if (info.live) { stage.classList.remove("loading"); $("wmeta").textContent = "Live streams abhi supported nahi hain"; return; }
+
+  curV = pickVideo(info); curA = pickAudio(info);
+  if (!curA || (!audioMode() && !curV)) { stage.classList.remove("loading"); toast("Is browser mein koi playable format nahi mila"); return; }
+  fillQuality(info);
+  const start = resumeAt(id);
+  setSrc(a, curA.url, start);
+  if (!audioMode()) setSrc(v, curV.url, start);
+  applyVolume(); v.playbackRate = a.playbackRate = prefs.speed;
+  master().play().catch(() => {});
+  if (!audioMode()) syncTimer = setInterval(syncDrift, 500);
+}
+
+// hls.js is ~400KB, so it's only loaded the first time an MX title is opened.
+let hlsLib;
+function loadHls() {
+  return hlsLib ??= new Promise((res, rej) => {
+    const s = document.createElement("script");
+    s.src = "/static/vendor/hls.min.js"; s.onload = () => res(window.Hls); s.onerror = () => { hlsLib = null; rej(new Error("hls.js load nahi hua")); };
+    document.head.appendChild(s);
+  });
+}
+// Fixed MX level: the highest rendition at or below maxH (BEST = top). No ABR switching.
+function mxLevelFor(maxH) {
+  if (!hls) return -1;
+  let best = 0;
+  hls.levels.forEach((l, i) => { if (l.height <= maxH && l.height >= hls.levels[best].height) best = i; });
+  return best;
+}
+function fillMxQuality() {
+  const lv = hls.levels.map((l, i) => [i, l.height]).sort((x, y) => y[1] - x[1]);
+  const top = lv[0] ? ` (${lv[0][1]}p)` : "";
+  $("quality").innerHTML = `<option value="${BEST}">Best${top}</option>` + lv.map(([, h]) => `<option value="${h}">${h}p</option>`).join("");
+  $("quality").value = prefs.mxMaxH === BEST || !lv.some(([, h]) => h === prefs.mxMaxH) ? String(BEST) : String(prefs.mxMaxH);
+}
+
+async function openMx(type, id) {
+  beginWatch("mx", `https://www.mxplayer.in/detail/${type}/${id}`, "MX Player");
+  let info, Hls;
+  try { [info, Hls] = await Promise.all([api(`/api/mx/video?type=${type}&id=${id}`, watchAbort.signal), loadHls()]); }
+  catch (e) { if (e.name !== "AbortError") { stage.classList.remove("loading"); $("wtitle").innerHTML = `<span class="err">${esc(e.message)}</span>`; } return; }
+  cur = info;
+  document.title = info.title + " · Local Tube";
+  $("poster").src = info.img || "";
+  $("wtitle").textContent = (info.seq && type === "episode" ? `E${info.seq} · ` : "") + info.title;
+  $("wmeta").textContent = [info.show, info.season, fmtDate(info.date)].filter(Boolean).join(" · ");
+  $("desc").textContent = info.description || "";
+  if (info.season_id) mxNav(info, watchAbort.signal);
+  if (!info.hls) {
+    stage.classList.remove("loading");
+    $("wmeta").innerHTML = `<span class="err">${info.drm ? "Ye title DRM protected hai — supported nahi." : "Iska open stream nahi mila (locked / login wala title)."}</span>`;
+    return;
+  }
+  const start = resumeAt(id);
+  applyVolume(); v.playbackRate = prefs.speed;
+  if (Hls.isSupported()) {
+    // Small buffers keep RAM low; the level is fixed (no ABR), so quality never shifts on its own.
+    hls = new Hls({ startPosition: start || -1, maxBufferLength: 30, maxMaxBufferLength: 60, backBufferLength: 30, enableWorker: true });
+    hls.on(Hls.Events.MANIFEST_PARSED, () => {
+      fillMxQuality();
+      hls.currentLevel = mxLevelFor(prefs.mxMaxH);
+      v.play().catch(() => {});
+    });
+    hls.on(Hls.Events.LEVEL_SWITCHED, (_, d) => { const h = hls.levels[d.level]?.height; if (h) setQLabel(h + "p"); });
+    hls.on(Hls.Events.ERROR, (_, d) => {
+      if (!d.fatal) return;
+      if (d.type === Hls.ErrorTypes.NETWORK_ERROR) hls.startLoad();
+      else if (d.type === Hls.ErrorTypes.MEDIA_ERROR) hls.recoverMediaError();
+      else { stage.classList.remove("loading"); toast("Playback error: " + d.details); }
+    });
+    hls.loadSource(info.hls);
+    hls.attachMedia(v);
+  } else if (v.canPlayType("application/vnd.apple.mpegurl")) {
+    setSrc(v, info.hls, start); v.play().catch(() => {});
+  } else { stage.classList.remove("loading"); toast("Is browser mein HLS supported nahi"); return; }
+}
+
+let dashLib, dashPlayer;
+function loadDash() {
+  return dashLib ??= new Promise((res, rej) => {
+    const s = document.createElement("script");
+    s.src = "/static/vendor/dash.all.min.js";
+    s.onload = () => res(window.dashjs);
+    s.onerror = () => { dashLib = null; rej(new Error("dash.js load nahi hua")); };
+    document.head.appendChild(s);
+  });
+}
+
+async function openSony(id) {
+  beginWatch("sony", "https://www.sonyliv.com", "Sony LIV");
+  let info, Dash;
+  try { [info, Dash] = await Promise.all([api(`/api/sony/video?id=${id}`, watchAbort.signal), loadDash()]); }
+  catch (e) { if (e.name !== "AbortError") { stage.classList.remove("loading"); $("wtitle").innerHTML = `<span class="err">${esc(e.message)}</span>`; } return; }
+  cur = info;
+  document.title = info.title + " · Local Tube";
+  $("poster").src = info.img || "";
+  $("wtitle").textContent = (info.seq ? `E${info.seq} · ` : "") + info.title;
+  $("wmeta").textContent = [info.show, fmtDate(info.date)].filter(Boolean).join(" · ");
+  $("desc").textContent = info.description || "";
+  if (info.season_id) sonyNav(info, watchAbort.signal);
+  if (!info.manifest) {
+    stage.classList.remove("loading");
+    $("wmeta").innerHTML = `<span class="err">${info.drm ? "Ye title DRM protected hai — supported nahi." : "Stream nahi mila."}</span>`;
+    return;
+  }
+  const start = resumeAt(id);
+  applyVolume(); v.playbackRate = prefs.speed;
+  if (dashPlayer) { dashPlayer.reset(); dashPlayer = null; }
+  const ev = Dash.MediaPlayer.events;
+  dashPlayer = Dash.MediaPlayer().create();
+  // Fixed quality like YouTube/MX: no ABR, the rendition only changes when the user picks one.
+  dashPlayer.updateSettings({ streaming: {
+    abr: { autoSwitchBitrate: { video: false, audio: false } },
+    buffer: { bufferTimeAtTopQuality: 30, bufferToKeep: 20 },
+  } });
+  dashPlayer.on(ev.STREAM_INITIALIZED, () => {
+    fillSonyQuality(); setSonyQuality();
+    v.play().catch(() => {});
+  });
+  dashPlayer.on(ev.QUALITY_CHANGE_RENDERED, e => {
+    if (e.mediaType !== "video") return;
+    const h = dashPlayer?.getBitrateInfoListFor("video")[e.newQuality]?.height; if (h) setQLabel(h + "p");
+  });
+  dashPlayer.on(ev.ERROR, e => {
+    stage.classList.remove("loading");
+    toast("Playback error: " + (e.error?.message || "Dash error"));
+  });
+  dashPlayer.initialize(v, info.manifest, true, start > 0 ? start : NaN);
+}
+// Sony quality: one entry per height; for each height the highest bitrate is used.
+function sonyLevels() {
+  const lv = dashPlayer?.getBitrateInfoListFor("video") || [];
+  return lv.filter(l => l.height).sort((x, y) => y.height - x.height || y.bitrate - x.bitrate);
+}
+function fillSonyQuality() {
+  const hs = [...new Set(sonyLevels().map(l => l.height))];
+  const top = hs[0] ? ` (${hs[0]}p)` : "";
+  $("quality").innerHTML = `<option value="${BEST}">Best${top}</option>` + hs.map(h => `<option value="${h}">${h}p</option>`).join("");
+  $("quality").value = prefs.sonyMaxH === BEST || !hs.includes(prefs.sonyMaxH) ? String(BEST) : String(prefs.sonyMaxH);
+}
+function setSonyQuality() {
+  const lv = sonyLevels(); if (!lv.length) return;
+  const pick = lv.find(l => l.height <= prefs.sonyMaxH) || lv[lv.length - 1];
+  dashPlayer.setQualityFor("video", pick.qualityIndex, true);
+  setQLabel(pick.height + "p");
+}
+
+async function sonyNav(info, signal) {
+  let eps;
+  try { const j = await api("/api/sony/season?id=" + info.season_id, signal); eps = j.episodes || []; } catch { return; }
+  if (cur !== info) return;
+  const i = eps.findIndex(e => String(e.id) === String(info.id));
+  const prev = eps[i - 1], next = eps[i + 1];
+  cur.next = next;
+  $("chapters").innerHTML = [
+    prev && `<a class="pill" href="#/sony/watch/${prev.id}">${icon("prev")} E${prev.seq}</a>`,
+    next && `<a class="pill" href="#/sony/watch/${next.id}">E${next.seq} ${icon("next")}</a>`,
+    info.show_id && `<a class="pill" href="#/sony/show/${info.show_id}/${info.season_id}">${icon("list")} All episodes</a>`,
+  ].filter(Boolean).join("");
+  renderSide(info.show || "Episodes",
+    eps.map(e => ({
+      href: "#/sony/watch/" + e.id,
+      key: e.id,
+      img: e.img,
+      title: `E${e.seq} · ${e.title}`,
+      sub: [fmtDur(e.duration), fmtDate(e.date)].filter(Boolean).join(" · ")
+    })), info.id);
+}
+// Prev / Next / show links and the side episode list, using the season's episode list.
+async function mxNav(info, signal) {
+  let eps;
+  try { eps = await seasonEpisodes(info.season_id, signal); } catch { return; }
+  if (cur !== info) return;
+  const i = eps.findIndex(e => e.id === info.id);
+  const prev = eps[i - 1], next = eps[i + 1];
+  cur.next = next;
+  $("chapters").innerHTML = [
+    prev && `<a class="pill" href="#/mx/watch/episode/${prev.id}">${icon("prev")} E${prev.seq}</a>`,
+    next && `<a class="pill" href="#/mx/watch/episode/${next.id}">E${next.seq} ${icon("next")}</a>`,
+    info.show_id && `<a class="pill" href="#/mx/show/${info.show_id}/${info.season_id}">${icon("list")} All episodes</a>`,
+  ].filter(Boolean).join("");
+  renderSide([info.show, info.season].filter(Boolean).join(" · ") || "Episodes",
+    eps.map(e => ({ ...mxCard(e), title: `E${e.seq} · ${e.title}`, sub: [fmtDur(e.duration), fmtDate(e.date)].filter(Boolean).join(" · ") })), info.id);
+}
+
+// Audio follows video; hard-seek on big drift, nudge playbackRate on small drift.
+function syncDrift() {
+  if (v.paused || v.seeking || a.seeking || !split()) return;
+  const d = a.currentTime - v.currentTime, base = v.playbackRate;
+  if (Math.abs(d) > 0.3) { a.currentTime = v.currentTime; a.playbackRate = base; }
+  else if (Math.abs(d) > 0.04) a.playbackRate = base * (d > 0 ? 0.97 : 1.03);
+  else if (a.playbackRate !== base) a.playbackRate = base;
+}
+// Only hard-seek audio when it's really off: every seek re-buffers and can stall.
+const alignAudio = () => { if (Math.abs(a.currentTime - v.currentTime) > 0.3) a.currentTime = v.currentTime; };
+onV("play", () => { if (!split()) return; alignAudio(); a.play().catch(() => {}); });
+onV("pause", () => { if (split() && !audioStall) a.pause(); });
+onV("seeking", () => { if (split()) a.currentTime = v.currentTime; });
+onV("waiting", () => { if (split()) a.pause(); stage.classList.add("loading"); });
+onV("playing", () => { retried = false; stage.classList.remove("loading"); if (split()) { alignAudio(); a.play().catch(() => {}); } });
+onV("ratechange", () => { a.playbackRate = v.playbackRate; });
+a.addEventListener("waiting", () => { if (split() && !v.paused) { audioStall = true; v.pause(); stage.classList.add("loading"); } });
+const audioReady = () => { if (audioStall) { audioStall = false; v.play().catch(() => {}); } else if (audioMode()) stage.classList.remove("loading"); };
+a.addEventListener("playing", () => { retried = false; audioReady(); });
+a.addEventListener("canplaythrough", audioReady);
+onV("ended", () => {
+  a.pause();
+  if (kind === "mx" && cur?.next) { toast("Up next: E" + cur.next.seq); location.hash = "#/mx/watch/episode/" + cur.next.id; }
+  else if (kind === "sony" && cur?.next) { toast("Up next: E" + cur.next.seq); location.hash = "#/sony/watch/" + cur.next.id; }
+});
+for (const el of [...vids, a]) el.addEventListener("error", () => {
+  if ((el !== v && el !== a) || kind !== "yt" || !el.getAttribute("src") || !cur) return; // hls.js handles its own errors
+  // Stream URLs expire / get IP-bound; re-resolve once with a fresh extraction.
+  if (!retried) { retried = true; toast("Stream refresh ho raha hai…"); savePos(); openVideo(cur.id, true); }
+  else { stage.classList.remove("loading"); toast("Playback error"); }
+});
+const onTime = () => {
+  const el = master();
+  if (sbSegs.length) for (const s of sbSegs) if (el.currentTime >= s[0] && el.currentTime < s[1] - 0.5) { el.currentTime = s[1]; toast("Sponsor skipped"); break; }
+};
+onV("timeupdate", () => { if (!audioMode()) onTime(); });
+a.addEventListener("timeupdate", () => { if (audioMode()) onTime(); });
+
+function savePos() { if (cur && master().currentTime > 0) memPos = { id: cur.id, t: master().currentTime }; }
+async function loadSponsorBlock(id, signal) {
+  try {
+    const cats = encodeURIComponent('["sponsor","selfpromo","interaction","intro","outro"]');
+    const r = await fetch(`https://sponsor.ajay.app/api/skipSegments?videoID=${id}&categories=${cats}`, { signal });
+    if (r.ok) sbSegs = (await r.json()).map(s => s.segment);
+  } catch {}
+}
+
+// ---------- controls ----------
+function applyVolume() {
+  // YouTube's video element has no audio track, so setting both is harmless and covers MX.
+  for (const el of [v, a]) { el.volume = prefs.volume; el.muted = prefs.muted; }
+  for (const el of vids) if (el !== v) el.muted = true; // the standby element never makes sound
+  $("vol").value = prefs.muted ? 0 : prefs.volume;
+  $("mute").innerHTML = icon(prefs.muted || prefs.volume === 0 ? "mute" : "vol");
+}
+$("vol").addEventListener("input", e => { prefs.volume = +e.target.value; prefs.muted = false; applyVolume(); savePrefs(); });
+$("mute").addEventListener("click", () => { prefs.muted = !prefs.muted; applyVolume(); savePrefs(); });
+$("quality").addEventListener("change", e => {
+  // YouTube and MX keep separate quality choices.
+  // MX: nextLevel switches at the next segment boundary without flushing the buffer (no blink).
+  if (kind === "mx") { prefs.mxMaxH = +e.target.value; savePrefs(); if (hls) hls.nextLevel = mxLevelFor(prefs.mxMaxH); }
+  else if (kind === "sony") { prefs.sonyMaxH = +e.target.value; savePrefs(); setSonyQuality(); }
+  else { prefs.maxH = +e.target.value; savePrefs(); switchVideo(); }
+});
+// Quality switch like YouTube: the new stream loads in the standby <video> while the
+// current one keeps playing with its audio. Once the standby has a playable frame a little
+// ahead of the audio, it starts exactly when the audio reaches that point and the two
+// elements swap places, so neither picture nor sound stops. How far ahead to aim is
+// learned from how long seeks into a new stream take on this device/network.
+let switchSeq = 0, switchLead = 1.5;
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+// Resolves on `type`, or rejects if the element errors first.
+const until = (el, type) => new Promise((res, rej) => {
+  const ok = () => { el.removeEventListener("error", bad); res(); };
+  const bad = () => { el.removeEventListener(type, ok); rej(el.error); };
+  el.addEventListener(type, ok, { once: true }); el.addEventListener("error", bad, { once: true });
+});
+async function switchVideo() {
+  if (!cur || audioMode()) return;
+  const f = pickVideo(cur); if (!f || f === curV) return;
+  const id = ++switchSeq, stale = () => switchSeq !== id;
+  curV = f; setQLabel(f.height + "p");
+  // Paused, or the element itself is fullscreen / picture-in-picture (can't be swapped
+  // out without leaving that mode): reload in place instead.
+  if (v.paused && !audioStall || v.webkitDisplayingFullscreen || document.pictureInPictureElement === v) return reloadVideo(f);
+  const nv = vids.find(x => x !== v);
+  nv.muted = true; nv.playbackRate = prefs.speed;
+  try {
+    const loadAt = performance.now();
+    nv.src = f.url;
+    await until(nv, "loadedmetadata"); if (stale()) return;
+    // A seek costs at least another round trip like the one that fetched the metadata.
+    switchLead = Math.min(4, Math.max(switchLead, (performance.now() - loadAt) / 1000 * 1.5));
+    for (;;) {
+      const began = performance.now();
+      nv.currentTime = Math.min(a.currentTime + switchLead * prefs.speed, Math.max(0, nv.duration - 0.3));
+      await until(nv, "seeked"); if (stale()) return;
+      if (nv.readyState < 3) { await until(nv, "canplay"); if (stale()) return; }
+      const took = (performance.now() - began) / 1000 * 1.3;
+      if (v.paused && !audioStall) { // paused meanwhile: line up with the paused picture
+        nv.currentTime = v.currentTime; await until(nv, "seeked"); if (stale()) return;
+        break;
+      }
+      const ahead = (nv.currentTime - a.currentTime) / prefs.speed;
+      if (ahead >= 0 && ahead < switchLead + 1) { // (a seek during the switch can leave it far off)
+        switchLead = Math.min(4, Math.max(0.5, (switchLead + took) / 2));
+        if (ahead > 0) { await sleep(ahead * 1000); if (stale()) return; }
+        await nv.play(); if (stale()) return;
+        break;
+      }
+      if (ahead < 0) switchLead = Math.min(6, Math.max(switchLead * 1.5, took)); // too slow: aim further ahead
+    }
+  } catch {
+    if (stale()) return;
+    nv.removeAttribute("src"); nv.load();
+    return reloadVideo(f); // the standby couldn't load it; fall back to an in-place reload
+  }
+  // Swap: the standby goes on screen with the controls, the old element is emptied.
+  const old = v; v = nv;
+  v.controls = true; v.classList.remove("standby");
+  old.controls = false; old.classList.add("standby");
+  applyVolume();
+  old.pause(); old.removeAttribute("src"); old.load();
+}
+// In-place reload of the on-screen element (brief stop; used only when a swap isn't possible).
+function reloadVideo(f) {
+  const t = v.currentTime, playing = !v.paused || audioStall;
+  freezeFrame();
+  setSrc(v, f.url, t); if (playing) v.play().catch(() => {});
+  // The new stream seeks to t (or just loads at 0); reveal it on its first painted frame.
+  const reveal = () => v.requestVideoFrameCallback ? v.requestVideoFrameCallback(unfreeze) : unfreeze();
+  v.addEventListener(t > 0 ? "seeked" : "loadeddata", reveal, { once: true });
+}
+// Changing quality reloads the <video>, which would flash black. Paint the current frame
+// onto a canvas over it until the new stream has a frame of its own.
+let freezeT;
+function freezeFrame() {
+  const c = $("freeze"), w = v.videoWidth, h = v.videoHeight;
+  if (!w || !h) return;
+  const k = Math.min(1, 1280 / w); // a preview-sized copy is plenty for a fraction of a second
+  c.width = Math.round(w * k); c.height = Math.round(h * k);
+  try { c.getContext("2d").drawImage(v, 0, 0, c.width, c.height); } catch { return; }
+  stage.classList.add("switching");
+  clearTimeout(freezeT); freezeT = setTimeout(unfreeze, 8000); // never leave a stale frame up
+}
+function unfreeze() { clearTimeout(freezeT); stage.classList.remove("switching"); }
+$("codec").addEventListener("change", e => { prefs.codec = e.target.value; savePrefs(); if (cur && split()) { switchVideo(); fillQuality(cur); } });
+$("speed").addEventListener("change", e => { prefs.speed = +e.target.value; savePrefs(); v.playbackRate = a.playbackRate = prefs.speed; });
+$("sb").addEventListener("change", e => { prefs.sb = e.target.checked; savePrefs(); if (!prefs.sb) sbSegs = []; else if (cur && kind === "yt") loadSponsorBlock(cur.id); });
+const setAudioBtn = () => $("audioOnly").setAttribute("aria-pressed", String(prefs.audioOnly));
+$("audioOnly").addEventListener("click", () => {
+  if (cur && kind === "yt") savePos(); // read the position before master() flips to the other element
+  prefs.audioOnly = !prefs.audioOnly; savePrefs(); setAudioBtn();
+  toast(prefs.audioOnly ? "Audio only: on" : "Audio only: off");
+  if (cur && kind === "yt") openVideo(cur.id);
+});
+a.controls = true;
+// Settings popover
+const menu = $("settings"), menuBtn = $("settingsBtn");
+const setMenu = open => { menu.classList.toggle("open", open); menuBtn.setAttribute("aria-expanded", String(open)); };
+menuBtn.addEventListener("click", e => { e.stopPropagation(); setMenu(!menu.classList.contains("open")); });
+document.addEventListener("click", e => { if (!e.target.closest(".menu-wrap")) setMenu(false); });
+$("desc").addEventListener("click", e => e.currentTarget.classList.toggle("open"));
+$("chapters").addEventListener("click", e => { const b = e.target.closest("button[data-t]"); if (b) { master().currentTime = +b.dataset.t; master().play().catch(() => {}); } });
+
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape") { setMenu(false); if (document.activeElement === $("q")) $("q").blur(); return; }
+  if (e.target.matches("input,select,textarea") || e.ctrlKey || e.metaKey || e.altKey) return;
+  if (e.key === "/") { e.preventDefault(); $("q").focus(); return; }
+  if (watch.style.display !== "grid") return;
+  const m = master(), k = e.key;
+  const seek = d => { m.currentTime = Math.max(0, m.currentTime + d); };
+  if (k === " " || k === "k") { e.preventDefault(); m.paused ? m.play().catch(() => {}) : m.pause(); }
+  else if (k === "j") seek(-10); else if (k === "l") seek(10);
+  else if (k === "ArrowLeft") { e.preventDefault(); seek(-5); } else if (k === "ArrowRight") { e.preventDefault(); seek(5); }
+  else if (k === "ArrowUp" || k === "ArrowDown") { e.preventDefault(); prefs.volume = Math.min(1, Math.max(0, +(prefs.volume + (k === "ArrowUp" ? 0.05 : -0.05)).toFixed(2))); prefs.muted = false; applyVolume(); savePrefs(); toast("Volume " + Math.round(prefs.volume * 100) + "%"); }
+  else if (k === "m") $("mute").click();
+  else if (k === "f" && !audioMode()) document.fullscreenElement ? document.exitFullscreen() : stage.requestFullscreen();
+  else if (k === "N" && (kind === "mx" || kind === "sony") && cur?.next) location.hash = (kind === "sony" ? "#/sony/watch/" : "#/mx/watch/episode/") + cur.next.id;
+  else if (/^[0-9]$/.test(k) && m.duration) m.currentTime = m.duration * (+k / 10);
+});
+// Mobile: pinch out to zoom the video to fill the screen (crops edges), pinch in to fit —
+// like the YouTube app. Two-finger moves on the player never zoom the page itself.
+let pinch0 = 0, hintT;
+const touchDist = t => Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY);
+function setFill(on) {
+  if (stage.classList.contains("fill") === on) return;
+  stage.classList.toggle("fill", on);
+  const h = $("zoomhint"); h.textContent = on ? "Zoomed to fill" : "Original"; h.classList.add("show");
+  clearTimeout(hintT); hintT = setTimeout(() => h.classList.remove("show"), 1200);
+}
+stage.addEventListener("touchstart", e => { pinch0 = e.touches.length === 2 ? touchDist(e.touches) : 0; }, { passive: true });
+stage.addEventListener("touchmove", e => {
+  if (e.touches.length !== 2) return;
+  e.preventDefault();
+  if (!pinch0 || !document.fullscreenElement) return; // zoom-to-fill only applies in fullscreen
+  const r = touchDist(e.touches) / pinch0;
+  if (r > 1.15) { setFill(true); pinch0 = 0; } else if (r < 0.87) { setFill(false); pinch0 = 0; }
+}, { passive: false });
+stage.addEventListener("touchend", () => { pinch0 = 0; }, { passive: true });
+document.addEventListener("fullscreenchange", () => {
+  if (!document.fullscreenElement) { stage.classList.remove("fill"); screen.orientation?.unlock?.(); return; }
+  // Landscape videos rotate the phone into landscape, like native players.
+  if (matchMedia("(pointer: coarse)").matches && v.videoWidth > v.videoHeight) screen.orientation?.lock?.("landscape").catch(() => {});
+});
+
+// Fullscreen on the stage (not the bare <video>) keeps our audio element in the DOM tree.
+onV("dblclick", e => { e.preventDefault(); document.fullscreenElement ? document.exitFullscreen() : stage.requestFullscreen(); });
+
+// Media Session: hardware media keys / lock-screen controls.
+if ("mediaSession" in navigator) {
+  const ms = navigator.mediaSession;
+  ms.setActionHandler("play", () => master().play());
+  ms.setActionHandler("pause", () => master().pause());
+  ms.setActionHandler("seekbackward", () => { master().currentTime -= 10; });
+  ms.setActionHandler("seekforward", () => { master().currentTime += 10; });
+  ms.setActionHandler("nexttrack", () => { if (cur?.next) location.hash = (kind === "sony" ? "#/sony/watch/" : "#/mx/watch/episode/") + cur.next.id; });
+  onV("loadedmetadata", () => cur && (ms.metadata = new MediaMetadata({
+    title: cur.title, artist: cur.channel || cur.show || "",
+    artwork: [{ src: (kind === "mx" || kind === "sony") ? cur.img || "" : `https://i.ytimg.com/vi/${cur.id}/hqdefault.jpg` }],
+  })));
+}
+
+// ---------- router ----------
+function route() {
+  setMenu(false);
+  const h = location.hash.slice(1) || "/";
+  let m;
+  if ((m = h.match(/^\/watch\/([A-Za-z0-9_-]{11})/))) { if (cur?.id !== m[1] || !master().getAttribute("src")) openVideo(m[1]); return; }
+  if ((m = h.match(/^\/mx\/watch\/(movie|episode|shorts)\/([0-9a-f]{32})/))) { if (cur?.id !== m[2]) openMx(m[1], m[2]); return; }
+  if ((m = h.match(/^\/sony\/watch\/(\d{10})/))) { if (cur?.id !== m[1]) openSony(m[1]); return; }
+  stopPlayback(); cur = null; watchAbort?.abort();
+  watch.style.display = "none"; list.style.display = "block"; window.scrollTo(0, 0);
+  if ((m = h.match(/^\/search\/(.+)/))) showSearch(decodeURIComponent(m[1]));
+  else if ((m = h.match(/^\/mx\/search\/(.+)/))) showMxSearch(decodeURIComponent(m[1]));
+  else if ((m = h.match(/^\/sony\/search\/(.+)/))) showSonySearch(decodeURIComponent(m[1]));
+  else if ((m = h.match(/^\/mx\/show\/([0-9a-f]{32})(?:\/([0-9a-f]{32}))?/))) showMxShow(m[1], m[2]);
+  else if ((m = h.match(/^\/sony\/show\/(\d{10})(?:\/(\d{10}))?/))) showSonyShow(m[1], m[2]);
+  else if ((m = h.match(/^\/mx\/season\/([0-9a-f]{32})/))) showMxSeason(m[1]);
+  else { $("q").value = ""; showHome(h === "/yt" ? "yt" : h === "/mx" ? "mx" : h === "/sony" ? "sony" : prefs.src); }
+}
+$("sb").checked = prefs.sb; $("codec").value = prefs.codec; $("speed").value = String(prefs.speed);
+setSource(prefs.src); setAudioBtn(); applyTheme(); applyVolume();
+fetch("/api/me").then(r => r.ok ? r.json() : null).then(j => { if (j?.login) $("logout").hidden = false; }).catch(() => {});
+window.addEventListener("hashchange", route);
+route();
+</script>
+</body>
+</html>
