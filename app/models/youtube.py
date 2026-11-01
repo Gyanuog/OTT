@@ -6,6 +6,7 @@ import http.client
 import re
 import threading
 import time
+from concurrent.futures import ThreadPoolExecutor
 
 # Ensure yt-dlp is in sys.path
 from app.config import (
@@ -232,9 +233,49 @@ def parse_video_id(text):
     return m.group(1) if m else None
 
 
+def home():
+    """Live categorized YouTube India home feed with hero banner items."""
+    tray_configs = [
+        ("🔥 Trending in India", "trending videos india", 12),
+        ("🎵 Trending Music & Hits", "new hindi songs trending", 10),
+        ("🎬 Latest Movie Trailers", "latest movie trailers hindi", 10),
+        ("😂 Comedy & Entertainment", "trending comedy videos india", 10),
+        ("🏏 Cricket & Sports Highlights", "cricket highlights india match", 10),
+        ("📱 Tech & Gadgets", "latest tech unboxing hindi", 10),
+        ("🎮 Trending Gaming", "trending gaming videos india", 10),
+        ("📰 Top News & Affairs", "top news headlines india today", 10),
+    ]
+
+    with ThreadPoolExecutor(max_workers=6) as pool:
+        rows = list(pool.map(lambda c: {"title": c[0], "items": search(c[1], count=c[2])}, tray_configs))
+
+    hero_items = []
+    if rows and rows[0]["items"]:
+        for it in rows[0]["items"][:5]:
+            hero_items.append({
+                "id": it["id"],
+                "title": it["title"],
+                "channel": it.get("channel") or "",
+                "views": it.get("views"),
+                "banner": f"https://i.ytimg.com/vi/{it['id']}/maxresdefault.jpg",
+                "img": f"https://i.ytimg.com/vi/{it['id']}/hqdefault.jpg",
+                "desc": f"{it.get('channel') or ''}" + (f" • {it.get('views')} views" if it.get("views") else ""),
+            })
+
+    return {
+        "hero": hero_items,
+        "rows": [r for r in rows if r["items"]],
+    }
+
+
 def warm_up():
-    """Start the JS-challenge worker and fill YoutubeDL pools."""
+    """Start the JS-challenge worker and pre-warm YouTubeDL pools & India home feed."""
     try:
         video_cache.get("jNQXAC9IVRw", lambda: extract_video("jNQXAC9IVRw"))
+    except Exception:
+        pass
+    try:
+        from app.services.cache import search_cache
+        search_cache.get("yt_home_in", lambda: home())
     except Exception:
         pass

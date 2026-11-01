@@ -2,6 +2,7 @@
 from app.models.youtube import (
     extract_video,
     search as yt_search,
+    home as yt_home,
     parse_video_id,
     public_info,
     enqueue_prefetch,
@@ -27,6 +28,7 @@ from app.models.sony import (
 __all__ = [
     "extract_video",
     "yt_search",
+    "yt_home",
     "parse_video_id",
     "public_info",
     "enqueue_prefetch",

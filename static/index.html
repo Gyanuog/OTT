@@ -406,11 +406,21 @@ function setSource(src) {
   $("q").placeholder = src === "mx" ? "Shows, movies ya MX link…" : src === "sony" ? "Shows ya Sony LIV link/ID…" : "Search ya YouTube link…";
 }
 // ---------- home ----------
-const YT_CATS = [["Trending", "trending videos india"], ["Music", "new hindi songs"], ["Comedy", "hindi comedy"], ["News", "hindi news today"],
-  ["Bhojpuri", "new bhojpuri song"], ["Cricket", "cricket highlights"], ["Tech", "tech news hindi"], ["Gaming", "gaming india"]];
+const YT_CATS = [
+  ["All", ""],
+  ["Music", "new hindi songs trending"],
+  ["Trailers", "latest movie trailers hindi"],
+  ["Comedy", "trending comedy videos india"],
+  ["Cricket", "cricket highlights india match"],
+  ["News", "top news headlines hindi today"],
+  ["Bhojpuri", "new bhojpuri song trending"],
+  ["Tech", "latest tech unboxing hindi"],
+  ["Gaming", "trending gaming videos india"]
+];
 const MX_HOME_PAGES = 6;
 let mxHome = null;            // { rows, next, done } — kept across visits so Back is instant
 const ytCatCache = {};
+let ytHomeCache = null;
 const skRow = (n, posters) => `<div class="sk-row${posters ? " posters" : ""}">${'<div class="sk"></div>'.repeat(n)}</div>`;
 const rowSec = (title, inner, cls = "", extra = "", id = "") =>
   `<section class="sec"${id ? ` id="${id}"` : ""}><div class="sec-h"><h2>${title}</h2><div class="arrows">${extra}` +
@@ -443,10 +453,34 @@ function showHome(src = prefs.src) {
     renderSonyHome(signal);
   } else {
     list.innerHTML = `<div class="cats" id="ytCats">${YT_CATS.map(([n], i) => `<button class="pill" data-i="${i}">${n}</button>`).join("")}</div>
-      <section class="sec"><div id="ytRow">${skeleton(8)}</div></section>`;
+      <div id="feat"></div><div id="ytRows"></div>`;
     $("ytCats").addEventListener("click", e => { const b = e.target.closest("button[data-i]"); if (b) loadYtCat(+b.dataset.i, signal); });
     loadYtCat(prefs.ytCat ?? 0, signal);
   }
+}
+
+function renderYtFeat(items, signal) {
+  if (!items || !items.length) { $("feat")?.remove(); return; }
+  $("feat").outerHTML = `<div class="feat" id="feat">${items.map((x, i) => `
+    <div class="slide${i ? "" : " on"}">
+      <img class="bg" src="${esc(x.banner || x.img)}" alt="" ${i ? 'loading="lazy"' : 'fetchpriority="high"'}>
+      <div class="slide-in">
+        <div class="eyebrow">YouTube India · Trending</div>
+        <h1>${esc(x.title)}</h1>
+        <p>${esc(x.channel ? x.channel + (x.views ? " · " + fmtNum(x.views) + " views" : "") : "")}</p>
+        <div class="btns"><a class="btn primary" href="#/watch/${x.id}">${icon("play", "sm fill")} Dekho</a></div>
+      </div>
+    </div>`).join("")}
+    <div class="dots">${items.map((_, i) => `<button aria-label="Slide ${i + 1}"${i ? "" : ' class="on"'}></button>`).join("")}</div>
+  </div>`;
+  const feat = $("feat"), slides = feat.querySelectorAll(".slide"), dots = feat.querySelectorAll(".dots button");
+  let at = 0, paused = false;
+  const show = n => { at = (n + slides.length) % slides.length; slides.forEach((s, i) => s.classList.toggle("on", i === at)); dots.forEach((d, i) => d.classList.toggle("on", i === at)); };
+  dots.forEach((d, i) => d.addEventListener("click", () => show(i)));
+  feat.addEventListener("pointerenter", () => { paused = true; });
+  feat.addEventListener("pointerleave", () => { paused = false; });
+  const t = setInterval(() => { if (!paused && !document.hidden) show(at + 1); }, 7000);
+  signal.addEventListener("abort", () => clearInterval(t));
 }
 
 async function renderSonyHome(signal) {
@@ -494,14 +528,32 @@ function renderSonyFeat(items, signal) {
 async function loadYtCat(i, signal) {
   prefs.ytCat = i; savePrefs();
   for (const b of $("ytCats").children) b.classList.toggle("on", +b.dataset.i === i);
+
+  if (i === 0) {
+    if (!ytHomeCache) $("ytRows").innerHTML = skRow(6, false);
+    try {
+      const j = ytHomeCache ??= await api("/api/yt/home", signal);
+      if (prefs.ytCat !== 0 || signal.aborted) return;
+      renderYtFeat(j.hero || [], signal);
+      lastYtResults = (j.rows || []).flatMap(r => r.items || []);
+      $("ytRows").innerHTML = (j.rows || []).map(r => rowSec(esc(r.title), r.items.map(x => card(ytCard(x))).join(""))).join("");
+    } catch (e) {
+      if (e.name !== "AbortError") $("ytRows").innerHTML = `<div class="m err">${esc(e.message)}</div>`;
+    }
+    return;
+  }
+
+  $("feat")?.remove();
   const q = YT_CATS[i][1];
-  if (!ytCatCache[q]) $("ytRow").innerHTML = skeleton(8);
+  if (!ytCatCache[q]) $("ytRows").innerHTML = skeleton(8);
   try {
     const res = ytCatCache[q] ??= (await api("/api/search?q=" + encodeURIComponent(q), signal)).results;
     if (prefs.ytCat !== i || signal.aborted) return;
-    lastYtResults = res; // watch page "Up next" continues from this row
-    $("ytRow").innerHTML = res.length ? grid(res.map(ytCard)) : '<div class="empty">Kuch nahi mila.</div>';
-  } catch (e) { if (e.name !== "AbortError") $("ytRow").innerHTML = `<div class="m err">${esc(e.message)}</div>`; }
+    lastYtResults = res;
+    $("ytRows").innerHTML = res.length ? grid(res.map(ytCard)) : '<div class="empty">Kuch nahi mila.</div>';
+  } catch (e) {
+    if (e.name !== "AbortError") $("ytRows").innerHTML = `<div class="m err">${esc(e.message)}</div>`;
+  }
 }
 
 async function renderMxHome(signal) {

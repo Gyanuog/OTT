@@ -7,6 +7,7 @@ from app.controllers.base import BaseController
 from app.models.youtube import (
     extract_video,
     search as yt_search,
+    home as yt_home,
     parse_video_id,
     public_info,
     enqueue_prefetch,
@@ -17,6 +18,11 @@ from app.views.responses import send_json
 
 
 class YouTubeController(BaseController):
+    @classmethod
+    def home(cls, handler):
+        data = search_cache.get("yt_home_in", lambda: yt_home())
+        return send_json(handler, 200, data, cache="private, max-age=300")
+
     @classmethod
     def search(cls, handler, query_params):
         query = cls.get_query_param(query_params, "q")[:200]

@@ -63,6 +63,9 @@ class AppRequestHandler(BaseHTTPRequestHandler):
                 return SonyController.handle(self, url.path[10:], q)
 
             # YouTube APIs
+            if url.path == "/api/yt/home":
+                return YouTubeController.home(self)
+
             if url.path == "/api/search":
                 return YouTubeController.search(self, q)
 
