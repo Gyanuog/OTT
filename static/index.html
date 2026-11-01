@@ -460,8 +460,23 @@ function showHome(src = prefs.src) {
 }
 
 function renderYtFeat(items, signal) {
-  if (!items || !items.length) { $("feat")?.remove(); return; }
-  $("feat").outerHTML = `<div class="feat" id="feat">${items.map((x, i) => `
+  let feat = $("feat");
+  if (!items || !items.length) {
+    if (feat) { feat.innerHTML = ""; feat.className = ""; }
+    return;
+  }
+  if (!feat) {
+    const rows = $("ytRows");
+    if (rows) {
+      feat = document.createElement("div");
+      feat.id = "feat";
+      rows.parentNode.insertBefore(feat, rows);
+    } else {
+      return;
+    }
+  }
+  feat.className = "feat";
+  feat.innerHTML = items.map((x, i) => `
     <div class="slide${i ? "" : " on"}">
       <img class="bg" src="${esc(x.banner || x.img)}" alt="" ${i ? 'loading="lazy"' : 'fetchpriority="high"'}>
       <div class="slide-in">
@@ -470,10 +485,10 @@ function renderYtFeat(items, signal) {
         <p>${esc(x.channel ? x.channel + (x.views ? " · " + fmtNum(x.views) + " views" : "") : "")}</p>
         <div class="btns"><a class="btn primary" href="#/watch/${x.id}">${icon("play", "sm fill")} Dekho</a></div>
       </div>
-    </div>`).join("")}
-    <div class="dots">${items.map((_, i) => `<button aria-label="Slide ${i + 1}"${i ? "" : ' class="on"'}></button>`).join("")}</div>
-  </div>`;
-  const feat = $("feat"), slides = feat.querySelectorAll(".slide"), dots = feat.querySelectorAll(".dots button");
+    </div>`).join("") +
+    `<div class="dots">${items.map((_, i) => `<button aria-label="Slide ${i + 1}"${i ? "" : ' class="on"'}></button>`).join("")}</div>`;
+
+  const slides = feat.querySelectorAll(".slide"), dots = feat.querySelectorAll(".dots button");
   let at = 0, paused = false;
   const show = n => { at = (n + slides.length) % slides.length; slides.forEach((s, i) => s.classList.toggle("on", i === at)); dots.forEach((d, i) => d.classList.toggle("on", i === at)); };
   dots.forEach((d, i) => d.addEventListener("click", () => show(i)));
@@ -502,8 +517,23 @@ async function renderSonyHome(signal) {
 }
 
 function renderSonyFeat(items, signal) {
-  if (!items.length) { $("feat")?.remove(); return; }
-  $("feat").outerHTML = `<div class="feat" id="feat">${items.map((x, i) => `
+  let feat = $("feat");
+  if (!items || !items.length) {
+    if (feat) { feat.innerHTML = ""; feat.className = ""; }
+    return;
+  }
+  if (!feat) {
+    const rows = $("sonyRows");
+    if (rows) {
+      feat = document.createElement("div");
+      feat.id = "feat";
+      rows.parentNode.insertBefore(feat, rows);
+    } else {
+      return;
+    }
+  }
+  feat.className = "feat";
+  feat.innerHTML = items.map((x, i) => `
     <div class="slide${i ? "" : " on"}">
       <img class="bg" src="${esc(x.banner || x.img)}" alt="" ${i ? 'loading="lazy"' : 'fetchpriority="high"'}>
       <div class="slide-in">
@@ -512,10 +542,10 @@ function renderSonyFeat(items, signal) {
         <p>${esc(x.desc || "")}</p>
         <div class="btns"><a class="btn primary" href="#/sony/show/${x.id}">${icon("play", "sm fill")} Dekho</a></div>
       </div>
-    </div>`).join("")}
-    <div class="dots">${items.map((_, i) => `<button aria-label="Slide ${i + 1}"${i ? "" : ' class="on"'}></button>`).join("")}</div>
-  </div>`;
-  const feat = $("feat"), slides = feat.querySelectorAll(".slide"), dots = feat.querySelectorAll(".dots button");
+    </div>`).join("") +
+    `<div class="dots">${items.map((_, i) => `<button aria-label="Slide ${i + 1}"${i ? "" : ' class="on"'}></button>`).join("")}</div>`;
+
+  const slides = feat.querySelectorAll(".slide"), dots = feat.querySelectorAll(".dots button");
   let at = 0, paused = false;
   const show = n => { at = (n + slides.length) % slides.length; slides.forEach((s, i) => s.classList.toggle("on", i === at)); dots.forEach((d, i) => d.classList.toggle("on", i === at)); };
   dots.forEach((d, i) => d.addEventListener("click", () => show(i)));
@@ -543,7 +573,8 @@ async function loadYtCat(i, signal) {
     return;
   }
 
-  $("feat")?.remove();
+  const feat = $("feat");
+  if (feat) { feat.innerHTML = ""; feat.className = ""; }
   const q = YT_CATS[i][1];
   if (!ytCatCache[q]) $("ytRows").innerHTML = skeleton(8);
   try {
@@ -563,7 +594,7 @@ async function renderMxHome(signal) {
     catch (e) {
       if (e.name === "AbortError") return;
       $("mxRows").innerHTML = "";
-      $("feat").outerHTML = `<div class="empty" id="feat"><div class="err">MX Player load nahi hua: ${esc(e.message)}</div></div>`;
+      if ($("feat")) $("feat").outerHTML = `<div class="empty" id="feat"><div class="err">MX Player load nahi hua: ${esc(e.message)}</div></div>`;
       return;
     }
   }
@@ -585,10 +616,25 @@ async function renderMxHome(signal) {
 const mxRow = r => rowSec(esc(r.title), r.items.map(x => posterCard({ ...mxCard(x), kind: MX_LABEL[x.type] })).join(""), "posters");
 
 function renderFeat(signal) {
+  let feat = $("feat");
   const items = (mxHome.rows[0]?.items || []).filter(x => x.banner).slice(0, 5);
-  if (!items.length) { $("feat").remove(); return; }
+  if (!items.length) {
+    if (feat) { feat.innerHTML = ""; feat.className = ""; }
+    return;
+  }
+  if (!feat) {
+    const rows = $("mxRows");
+    if (rows) {
+      feat = document.createElement("div");
+      feat.id = "feat";
+      rows.parentNode.insertBefore(feat, rows);
+    } else {
+      return;
+    }
+  }
   const go = x => x.type === "tvshow" ? "#/mx/show/" + x.id : mxHref(x.type, x.id);
-  $("feat").outerHTML = `<div class="feat" id="feat">${items.map((x, i) => `
+  feat.className = "feat";
+  feat.innerHTML = items.map((x, i) => `
     <div class="slide${i ? "" : " on"}">
       <img class="bg" src="${esc(x.banner)}" alt="" ${i ? 'loading="lazy"' : 'fetchpriority="high"'}>
       <div class="slide-in">
@@ -597,9 +643,9 @@ function renderFeat(signal) {
         <p>${esc(x.desc || "")}</p>
         <div class="btns"><a class="btn primary" href="${go(x)}">${icon("play", "sm fill")} ${x.type === "tvshow" ? "Watch now" : "Play"}</a></div>
       </div>
-    </div>`).join("")}
-    <div class="dots">${items.map((_, i) => `<button aria-label="Slide ${i + 1}"${i ? "" : ' class="on"'}></button>`).join("")}</div></div>`;
-  const feat = $("feat"), slides = feat.querySelectorAll(".slide"), dots = feat.querySelectorAll(".dots button");
+    </div>`).join("") +
+    `<div class="dots">${items.map((_, i) => `<button aria-label="Slide ${i + 1}"${i ? "" : ' class="on"'}></button>`).join("")}</div>`;
+  const slides = feat.querySelectorAll(".slide"), dots = feat.querySelectorAll(".dots button");
   let at = 0, paused = false;
   const show = n => { at = (n + slides.length) % slides.length; slides.forEach((s, i) => s.classList.toggle("on", i === at)); dots.forEach((d, i) => d.classList.toggle("on", i === at)); };
   dots.forEach((d, i) => d.addEventListener("click", () => show(i)));
