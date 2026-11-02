@@ -45,6 +45,10 @@ class MainActivity : AppCompatActivity() {
         s.useWideViewPort = true
         s.loadWithOverviewMode = true
         s.databaseEnabled = true
+        s.userAgentString = s.userAgentString + " LocalTubeApp/1.0"
+        s.setSupportZoom(false)
+        s.builtInZoomControls = false
+        s.displayZoomControls = false
 
         webView.webViewClient = object : WebViewClient() {
             override fun onPageFinished(view: WebView?, url: String?) {
@@ -132,11 +136,20 @@ class MainActivity : AppCompatActivity() {
     override fun onBackPressed() {
         if (customView != null) {
             webView.webChromeClient?.onHideCustomView()
-        } else if (webView.canGoBack()) {
-            webView.goBack()
         } else {
-            @Suppress("DEPRECATION")
-            super.onBackPressed()
+            webView.evaluateJavascript("(function(){ return Boolean(window.handleAppBack && window.handleAppBack()); })()") { handled ->
+                val wasHandled = handled == "true" || handled == "\"true\""
+                if (!wasHandled) {
+                    runOnUiThread {
+                        if (webView.canGoBack()) {
+                            webView.goBack()
+                        } else {
+                            @Suppress("DEPRECATION")
+                            super.onBackPressed()
+                        }
+                    }
+                }
+            }
         }
     }
 }

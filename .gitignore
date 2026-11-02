@@ -14,3 +14,5 @@ build/
 android/app/src/main/python/
 android/.gradle/
 android/app/build/
+android/.idea/
+android/local.properties

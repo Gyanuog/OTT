@@ -2,7 +2,10 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0b0b0d" id="themeColor">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="referrer" content="no-referrer">
 <meta name="color-scheme" content="light dark">
 <title>Local Tube</title>
@@ -12,6 +15,7 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23e5254a'/%3E%3Cpath d='M12 9.5v13l11-6.5z' fill='white'/%3E%3C/svg%3E">
 <style>
 :root{
+  --sat:env(safe-area-inset-top,0px);--sab:env(safe-area-inset-bottom,0px);
   --bg:#ffffff;--surface:#f5f5f7;--surface-2:#ebebee;--elev:#ffffff;--fg:#0e0e10;--fg-2:#3a3a40;--muted:#6e6e78;
   --line:#e7e7eb;--accent:#e5254a;--accent-soft:rgba(229,37,74,.1);--shadow:0 8px 30px rgba(15,15,20,.12);
   --scrim:rgba(0,0,0,.72);--radius:14px;--radius-sm:10px;color-scheme:light;
@@ -22,13 +26,14 @@
 :root[data-theme="dark"]{
   --bg:#0b0b0d;--surface:#151518;--surface-2:#202025;--elev:#1a1a1e;--fg:#f4f4f6;--fg-2:#d0d0d6;--muted:#9a9aa5;
   --line:#26262c;--accent:#ff4d6d;--accent-soft:rgba(255,77,109,.14);--shadow:0 10px 34px rgba(0,0,0,.5);color-scheme:dark}
-*{box-sizing:border-box}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 [hidden]{display:none!important}
 html{-webkit-text-size-adjust:100%}
-body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.5 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
-a{color:inherit;text-decoration:none}
+body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.5 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:inherit;text-decoration:none;-webkit-touch-callout:none}
 button,select,input{font:inherit;color:inherit}
-button{cursor:pointer}
+button{cursor:pointer;touch-action:manipulation;-webkit-user-select:none;user-select:none}
+button:active{transform:scale(.97)}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .i{width:20px;height:20px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .i.sm{width:16px;height:16px}.i.fill{fill:currentColor;stroke:none}
@@ -209,26 +214,114 @@ main{max-width:1440px;margin:0 auto;padding:24px 20px 64px}
 .toast{position:fixed;left:50%;bottom:28px;transform:translate(-50%,8px);background:var(--fg);color:var(--bg);font-weight:500;padding:10px 16px;border-radius:999px;opacity:0;transition:opacity .2s,transform .2s;pointer-events:none;z-index:50;box-shadow:var(--shadow)}
 .toast.show{opacity:1;transform:translate(-50%,0)}
 
+/* Desktop / Mobile utility visibility */
+.mob-only{display:none!important}
+.desk-only{display:flex!important}
+div.desk-only{display:block!important}
+form.desk-only{display:flex!important}
+
+/* Mobile Bottom Navigation Bar */
+.mob-bottom-nav{display:none;position:fixed;bottom:0;left:0;right:0;height:calc(54px + var(--sab));padding-bottom:var(--sab);background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:saturate(1.8) blur(18px);-webkit-backdrop-filter:saturate(1.8) blur(18px);border-top:1px solid var(--line);z-index:40;justify-content:space-around;align-items:center;user-select:none;-webkit-user-select:none}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;background:none;border:0;padding:4px 0;color:var(--muted);transition:color .15s,transform .1s;cursor:pointer}
+.nav-item:active{transform:scale(.92)}
+.nav-icon{display:grid;place-items:center;width:32px;height:24px;border-radius:12px;transition:background .15s,color .15s}
+.nav-icon .i{width:20px;height:20px}
+.nav-label{font-size:11px;font-weight:600;margin-top:2px;letter-spacing:-.01em}
+.nav-item.on{color:var(--fg)}
+.nav-item.on .nav-icon{background:var(--accent-soft);color:var(--accent)}
+.nav-item.on .nav-label{font-weight:700;color:var(--accent)}
+
+/* Mobile Search Overlay */
+.mob-search-overlay{position:fixed;inset:0;background:var(--bg);z-index:60;display:flex;flex-direction:column;padding-top:var(--sat);animation:mobFadeIn .18s ease-out}
+@keyframes mobFadeIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+.mob-search-bar{display:flex;align-items:center;gap:8px;height:54px;padding:0 12px;border-bottom:1px solid var(--line)}
+.mob-search-form{flex:1;display:flex;align-items:center;background:var(--surface);border-radius:999px;height:40px;padding:0 12px;gap:6px}
+.mob-search-form input{flex:1;border:0;background:none;outline:none;font-size:14.5px;color:var(--fg);min-width:0}
+.mob-search-clear{border:0;background:none;color:var(--muted);padding:4px;display:grid;place-items:center}
+.mob-search-quick{padding:16px 14px;overflow-y:auto}
+.mob-quick-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:12px}
+.mob-quick-pills{display:flex;flex-wrap:wrap;gap:8px}
+
+/* Mobile Bottom Sheet Modal */
+.mob-sheet-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.62);z-index:70;display:flex;align-items:flex-end;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);animation:mobBackdropFade .2s ease-out}
+@keyframes mobBackdropFade{from{opacity:0}to{opacity:1}}
+.mob-sheet{width:100%;max-height:80vh;background:var(--elev);border-radius:20px 20px 0 0;border-top:1px solid var(--line);padding:8px 16px calc(24px + var(--sab));overflow-y:auto;box-shadow:0 -8px 32px rgba(0,0,0,.4);animation:sheetUp .25s cubic-bezier(.16,1,.3,1)}
+@keyframes sheetUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.mob-sheet-handle{width:36px;height:4px;border-radius:999px;background:var(--muted);opacity:.45;margin:6px auto 14px}
+.mob-sheet-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--line)}
+.mob-sheet-title{margin:0;font-size:16px;font-weight:700}
+.mob-sheet-content{display:grid;gap:4px}
+.sheet-opt{display:flex;align-items:center;justify-content:space-between;width:100%;padding:13px 12px;border:0;background:none;border-radius:10px;font-size:14.5px;font-weight:500;color:var(--fg);text-align:left;transition:background .12s}
+.sheet-opt:active{background:var(--surface)}
+.sheet-opt.active{color:var(--accent);font-weight:700;background:var(--accent-soft)}
+.sheet-opt .i{color:var(--accent)}
+
 @media (max-width:1100px){#watch{grid-template-columns:1fr}.side{margin-top:8px}.side-list{max-height:none}}
-@media (max-width:720px){
-  .top{gap:8px;padding:0 12px}.brand .name{display:none}
-  .search kbd,.search .i{display:none}.search input{padding-left:10px}
-  .seg button{padding:4px 9px}.seg .long{display:none}
-  .actions{gap:0}
-  main,#watch{padding-left:12px;padding-right:12px}
-  .grid{grid-template-columns:1fr}
-  .hero-in{flex-direction:column;align-items:stretch;padding:18px}.hero img.poster{width:100%}
-  .ep{grid-template-columns:130px 1fr;gap:12px;padding:6px}.ep .d{display:none}
-  .mini{grid-template-columns:140px 1fr}
-  .actions .icon-btn{width:34px;height:34px}
-  .feat{aspect-ratio:4/5;min-height:0;border-radius:16px;margin-bottom:28px}
+@media (max-width:768px){
+  .desk-only{display:none!important}
+  .mob-only{display:flex!important}
+  button.mob-only{display:grid!important}
+  .mob-bottom-nav{display:flex}
+
+  /* mobile header */
+  .top{height:calc(54px + var(--sat));padding:var(--sat) 12px 0;gap:10px;border-bottom:1px solid var(--line)}
+  .brand{font-size:16px;gap:8px}
+  .brand .mark{width:28px;height:28px;border-radius:8px}
+  .brand .mark .i{width:13px;height:13px}
+  .brand .name{display:inline}
+  .actions{gap:4px}
+  .actions .icon-btn{width:36px;height:36px}
+  #mobBackBtn{display:grid!important;place-items:center;width:36px;height:36px;border:0;background:none;color:var(--fg);border-radius:999px;margin-right:-4px}
+
+  /* feed */
+  main#list{padding:8px 12px calc(72px + var(--sab));max-width:100%}
+  .cats{margin:0 -12px 14px;padding:0 12px;gap:8px}
+  .cats .pill{padding:6px 12px;font-size:13px;border-radius:8px;flex:none}
+  .grid{display:flex;flex-direction:column;gap:18px}
+  .card{width:100%;contain-intrinsic-size:auto 280px}
+  .card .thumb{border-radius:12px;aspect-ratio:16/9}
+  .card .t{font-size:15px;font-weight:600;line-height:1.35;margin:9px 2px 3px}
+  .card .s{font-size:13px}
+  .sec{margin-bottom:28px}
+  .sec-h h2{font-size:17px;font-weight:700}
+  .arrows{display:none}
+  .row{grid-auto-columns:78%}
+  .row.posters{grid-auto-columns:135px;gap:10px;margin:0 -12px;padding:0 12px 8px}
+  .pcard .thumb{border-radius:10px}
+  .pcard .t{font-size:13px;margin-top:6px}
+  .hero-in{flex-direction:column;align-items:stretch;padding:16px;gap:16px}.hero img.poster{width:100%}
+  .hero h1{font-size:22px}
+  .ep{grid-template-columns:120px 1fr;gap:10px;padding:8px 6px}.ep .d{display:none}
+  .ep .no{font-size:11px}
+  .ep .t{font-size:14px}
+  .feat{aspect-ratio:4/5;min-height:0;border-radius:16px;margin-bottom:24px}
   .slide>img.bg{object-position:center top}
   .slide::before{background:linear-gradient(0deg,rgba(8,8,10,.95) 0%,rgba(8,8,10,.6) 40%,rgba(8,8,10,0) 70%)}
-  .slide-in{left:18px;right:18px;bottom:44px;max-width:none}
-  .slide .logo{max-width:220px;max-height:90px}
-  .dots{left:18px;right:auto;bottom:18px}
-  .arrows button[data-dir]{display:none}
-  .row{grid-auto-columns:78%}.row.posters{grid-auto-columns:38%}
+  .slide-in{left:16px;right:16px;bottom:38px;max-width:none}
+  .slide .logo{max-width:200px;max-height:80px}
+  .dots{left:16px;right:auto;bottom:16px}
+
+  /* mobile watch view */
+  #watch{padding:0 0 calc(70px + var(--sab));grid-template-columns:1fr;gap:0}
+  #watch .primary{width:100%}
+  #watch .stage{width:100%;border-radius:0;margin:0;aspect-ratio:16/9;box-shadow:none}
+  #watch .w-details{padding:12px 14px 0}
+  #wtitle{margin:8px 0 4px;font-size:16px;line-height:1.35;font-weight:700}
+  .wmeta{font-size:12.5px;color:var(--muted);margin-bottom:10px}
+  .toolbar{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;padding:2px 0 10px;margin:6px 0 10px;flex-wrap:nowrap}
+  .toolbar::-webkit-scrollbar{display:none}
+  .mob-pills{display:flex!important;gap:8px;flex:none}
+  .tb{height:36px;padding:0 13px;font-size:13px;white-space:nowrap;flex:none;background:var(--surface);border-radius:999px;color:var(--fg-2)}
+  .tb:active{transform:scale(.96);background:var(--surface-2)}
+  .tb.on{background:var(--accent-soft);color:var(--accent);font-weight:600}
+  .desc{margin:4px 0 14px;padding:10px 12px;border-radius:12px;font-size:13px;line-height:1.4;background:var(--surface)}
+  .desc:not(.open){max-height:4.5em}
+  .side{padding:0 14px;margin-top:14px}
+  .side h3{font-size:15px;font-weight:700;margin:0 0 10px}
+  .mini{grid-template-columns:130px 1fr;gap:10px;padding:8px 0;border-bottom:1px solid color-mix(in srgb,var(--line) 50%,transparent);border-radius:0}
+  .mini .thumb{aspect-ratio:16/9;border-radius:8px}
+  .mini .t{font-size:13.5px;line-height:1.35;margin-bottom:3px}
+  .mini .s{font-size:12px}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
@@ -251,11 +344,20 @@ main{max-width:1440px;margin:0 auto;padding:24px 20px 64px}
   <symbol id="i-left" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></symbol>
   <symbol id="i-right" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
   <symbol id="i-lock" viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></symbol>
+  <symbol id="i-yt" viewBox="0 0 24 24"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"/><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02" fill="currentColor"/></symbol>
+  <symbol id="i-film" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M7 3v18M17 3v18M3 7.5h4M3 12h18M3 16.5h4M17 7.5h4M17 16.5h4"/></symbol>
+  <symbol id="i-tv" viewBox="0 0 24 24"><rect width="20" height="15" x="2" y="3" rx="2"/><polyline points="17 21 12 18 7 21"/></symbol>
+  <symbol id="i-arrow-left" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></symbol>
+  <symbol id="i-close" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></symbol>
 </svg>
 
 <header class="top">
+  <button class="icon-btn mob-only" id="mobBackBtn" type="button" aria-label="Go back" hidden>
+    <svg class="i"><use href="#i-arrow-left"/></svg>
+  </button>
   <a class="brand" href="#/" aria-label="Home"><span class="mark"><svg class="i fill"><use href="#i-play"/></svg></span><span class="name">Local Tube</span></a>
-  <form id="sf" class="search" role="search">
+  <form id="sf" class="search desk-only" role="search">
     <div class="seg" role="tablist" aria-label="Source">
       <button type="button" role="tab" data-src="yt">YouTube</button><button type="button" role="tab" data-src="mx">MX<span class="long"> Player</span></button><button type="button" role="tab" data-src="sony">Sony<span class="long"> LIV</span></button>
     </div>
@@ -264,6 +366,7 @@ main{max-width:1440px;margin:0 auto;padding:24px 20px 64px}
     <kbd>/</kbd>
   </form>
   <div class="actions">
+    <button class="icon-btn mob-only" id="mobSearchTrigger" type="button" aria-label="Search"><svg class="i"><use href="#i-search"/></svg></button>
     <button class="icon-btn" id="audioOnly" aria-pressed="false" title="Audio only (YouTube) — sabse kam data/CPU"><svg class="i"><use href="#i-headphones"/></svg></button>
     <button class="icon-btn" id="theme" title="Theme"><svg class="i"><use href="#i-moon"/></svg></button>
     <a class="icon-btn" id="logout" href="/logout" title="Logout" hidden><svg class="i"><use href="#i-logout"/></svg></a>
@@ -283,31 +386,43 @@ main{max-width:1440px;margin:0 auto;padding:24px 20px 64px}
       <div class="spin"></div>
       <div class="zoomhint" id="zoomhint"></div>
     </div>
-    <h1 id="wtitle"></h1>
-    <div class="wmeta" id="wmeta"></div>
-    <div class="toolbar">
-      <div class="vol">
-        <button class="tb icon" id="mute" title="Mute (m)"><svg class="i sm"><use href="#i-vol"/></svg></button>
-        <input type="range" id="vol" min="0" max="1" step="0.02" aria-label="Volume">
-      </div>
-      <span class="sp"></span>
-      <div class="menu-wrap">
-        <button class="tb" id="settingsBtn" aria-haspopup="true" aria-expanded="false"><svg class="i sm"><use href="#i-sliders"/></svg><span id="qLabel">Auto</span></button>
-        <div class="menu" id="settings" role="menu">
-          <label>Quality <select id="quality"></select></label>
-          <label class="yt-only">Codec <select id="codec">
-            <option value="vp9">VP9 · GPU</option><option value="h264">H.264 · GPU</option><option value="av1">AV1 · CPU heavy</option><option value="any">Any codec</option>
-          </select></label>
-          <label>Speed <select id="speed">
-            <option>0.5</option><option>0.75</option><option value="1" selected>Normal</option><option>1.25</option><option>1.5</option><option>1.75</option><option>2</option>
-          </select></label>
-          <label class="yt-only">SponsorBlock <input type="checkbox" class="switch" id="sb"></label>
+    <div class="w-details">
+      <h1 id="wtitle"></h1>
+      <div class="wmeta" id="wmeta"></div>
+      <div class="toolbar">
+        <div class="vol desk-only">
+          <button class="tb icon" id="mute" title="Mute (m)"><svg class="i sm"><use href="#i-vol"/></svg></button>
+          <input type="range" id="vol" min="0" max="1" step="0.02" aria-label="Volume">
         </div>
+        <span class="sp desk-only"></span>
+        <div class="menu-wrap desk-only">
+          <button class="tb" id="settingsBtn" aria-haspopup="true" aria-expanded="false"><svg class="i sm"><use href="#i-sliders"/></svg><span id="qLabel">Auto</span></button>
+          <div class="menu" id="settings" role="menu">
+            <label>Quality <select id="quality"></select></label>
+            <label class="yt-only">Codec <select id="codec">
+              <option value="vp9">VP9 · GPU</option><option value="h264">H.264 · GPU</option><option value="av1">AV1 · CPU heavy</option><option value="any">Any codec</option>
+            </select></label>
+            <label>Speed <select id="speed">
+              <option>0.5</option><option>0.75</option><option value="1" selected>Normal</option><option>1.25</option><option>1.5</option><option>1.75</option><option>2</option>
+            </select></label>
+            <label class="yt-only">SponsorBlock <input type="checkbox" class="switch" id="sb"></label>
+          </div>
+        </div>
+
+        <!-- Mobile Quick Action Pills -->
+        <div class="mob-pills mob-only">
+          <button class="tb" id="mobQualityBtn" type="button"><svg class="i sm"><use href="#i-sliders"/></svg><span id="mobQLabel">Quality</span></button>
+          <button class="tb" id="mobSpeedBtn" type="button"><span>⚡</span><span id="mobSpeedLabel">1x</span></button>
+          <button class="tb yt-only" id="mobAudioBtn" type="button"><svg class="i sm"><use href="#i-headphones"/></svg><span>Audio</span></button>
+          <button class="tb yt-only" id="mobCodecBtn" type="button"><span>🎞️</span><span id="mobCodecLabel">Codec</span></button>
+          <button class="tb yt-only" id="mobSbBtn" type="button"><span>🛡️</span><span id="mobSbLabel">SB</span></button>
+        </div>
+
+        <a class="tb" id="extlink" target="_blank" rel="noopener noreferrer"><svg class="i sm"><use href="#i-ext"/></svg><span></span></a>
       </div>
-      <a class="tb" id="extlink" target="_blank" rel="noopener noreferrer"><svg class="i sm"><use href="#i-ext"/></svg><span></span></a>
+      <div class="chap" id="chapters"></div>
+      <div class="desc" id="desc" title="Click to expand"></div>
     </div>
-    <div class="chap" id="chapters"></div>
-    <div class="desc" id="desc" title="Click to expand"></div>
   </div>
   <aside class="side">
     <h3 id="sideTitle"></h3>
@@ -315,6 +430,56 @@ main{max-width:1440px;margin:0 auto;padding:24px 20px 64px}
   </aside>
 </section>
 <div class="toast" id="toast" role="status"></div>
+
+<!-- Mobile Navigation Bar -->
+<nav class="mob-bottom-nav" id="mobBottomNav" aria-label="Mobile Navigation">
+  <button class="nav-item on" type="button" data-src="yt" aria-label="YouTube">
+    <div class="nav-icon"><svg class="i"><use href="#i-yt"/></svg></div>
+    <span class="nav-label">YouTube</span>
+  </button>
+  <button class="nav-item" type="button" data-src="mx" aria-label="MX Player">
+    <div class="nav-icon"><svg class="i"><use href="#i-film"/></svg></div>
+    <span class="nav-label">MX Player</span>
+  </button>
+  <button class="nav-item" type="button" data-src="sony" aria-label="Sony LIV">
+    <div class="nav-icon"><svg class="i"><use href="#i-tv"/></svg></div>
+    <span class="nav-label">Sony LIV</span>
+  </button>
+</nav>
+
+<!-- Mobile Search Overlay -->
+<div class="mob-search-overlay" id="mobSearchOverlay" hidden>
+  <div class="mob-search-bar">
+    <button class="icon-btn" id="mobSearchBack" type="button" aria-label="Back"><svg class="i"><use href="#i-arrow-left"/></svg></button>
+    <form class="mob-search-form" id="mobSearchForm">
+      <input id="mobSearchInput" type="text" autocomplete="off" enterkeyhint="search" aria-label="Search" placeholder="Search videos...">
+      <button class="icon-btn sm" id="mobSearchClear" type="button" aria-label="Clear text" hidden><svg class="i sm"><use href="#i-close"/></svg></button>
+      <button class="icon-btn sm" type="submit" aria-label="Search" style="border:0;background:none;color:var(--muted);"><svg class="i sm"><use href="#i-search"/></svg></button>
+    </form>
+  </div>
+  <div class="mob-search-quick">
+    <div class="mob-quick-title">Popular Searches</div>
+    <div class="mob-quick-pills" id="mobQuickPills">
+      <button class="pill" type="button" data-q="New Hindi Songs 2026">🎵 New Hindi Songs</button>
+      <button class="pill" type="button" data-q="Latest Bollywood Movie Trailers">🎬 Movie Trailers</button>
+      <button class="pill" type="button" data-q="Trending Comedy Videos">😂 Trending Comedy</button>
+      <button class="pill" type="button" data-q="Cricket Highlights India">🏏 Cricket Highlights</button>
+      <button class="pill" type="button" data-q="Latest Tech News Hindi">📱 Tech & Gadgets</button>
+    </div>
+  </div>
+</div>
+
+<!-- Mobile Bottom Sheet Modal -->
+<div class="mob-sheet-backdrop" id="mobSheetBackdrop" hidden>
+  <div class="mob-sheet" id="mobSheet" role="dialog" aria-modal="true">
+    <div class="mob-sheet-handle"></div>
+    <div class="mob-sheet-head">
+      <h3 class="mob-sheet-title" id="mobSheetTitle">Settings</h3>
+      <button class="icon-btn sm" id="mobSheetClose" type="button" aria-label="Close"><svg class="i sm"><use href="#i-close"/></svg></button>
+    </div>
+    <div class="mob-sheet-content" id="mobSheetContent"></div>
+  </div>
+</div>
 
 <script>
 "use strict";
@@ -363,8 +528,11 @@ async function api(path, signal) {
 // ---------- theme ----------
 const isDark = () => prefs.theme === "dark" || (prefs.theme === "auto" && matchMedia("(prefers-color-scheme: dark)").matches);
 function applyTheme() {
+  const dark = isDark();
   if (prefs.theme === "auto") delete document.documentElement.dataset.theme; else document.documentElement.dataset.theme = prefs.theme;
-  $("theme").innerHTML = icon(isDark() ? "sun" : "moon", "");
+  $("theme").innerHTML = icon(dark ? "sun" : "moon", "");
+  const tc = $("themeColor");
+  if (tc) tc.setAttribute("content", dark ? "#0b0b0d" : "#ffffff");
 }
 $("theme").addEventListener("click", () => { prefs.theme = isDark() ? "light" : "dark"; savePrefs(); applyTheme(); });
 
@@ -403,7 +571,11 @@ let listAbort, lastYtResults = [];
 function setSource(src) {
   prefs.src = src; savePrefs();
   for (const b of document.querySelectorAll(".seg button")) b.setAttribute("aria-selected", String(b.dataset.src === src));
-  $("q").placeholder = src === "mx" ? "Shows, movies ya MX link…" : src === "sony" ? "Shows ya Sony LIV link/ID…" : "Search ya YouTube link…";
+  for (const b of document.querySelectorAll("#mobBottomNav .nav-item")) b.classList.toggle("on", b.dataset.src === src);
+  const ph = src === "mx" ? "Shows, movies ya MX link…" : src === "sony" ? "Shows ya Sony LIV link/ID…" : "Search ya YouTube link…";
+  $("q").placeholder = ph;
+  const mobQ = $("mobSearchInput");
+  if (mobQ) mobQ.placeholder = ph;
 }
 // ---------- home ----------
 const YT_CATS = [
@@ -869,7 +1041,25 @@ function pickVideo(info) {
   return pool.find(f => f.height <= prefs.maxH) || pool[pool.length - 1] || null;
 }
 function pickAudio(info) { return info.audios.find(f => playable(a, f)) || null; }
-const setQLabel = t => { $("qLabel").textContent = t; };
+const setQLabel = t => {
+  $("qLabel").textContent = t;
+  const mobQ = $("mobQLabel");
+  if (mobQ) mobQ.textContent = t || "Quality";
+};
+const setSpeedLabel = s => {
+  const el = $("mobSpeedLabel");
+  if (el) el.textContent = s == 1 ? "1x" : s + "x";
+};
+const setCodecLabel = c => {
+  const el = $("mobCodecLabel");
+  if (el) el.textContent = (c || "vp9").toUpperCase();
+};
+const setSbLabel = on => {
+  const el = $("mobSbLabel");
+  if (el) el.textContent = on ? "SB: On" : "SB: Off";
+  const btn = $("mobSbBtn");
+  if (btn) btn.classList.toggle("on", on);
+};
 
 function fillQuality(info) {
   const seen = new Set(), opts = [];
@@ -1308,7 +1498,12 @@ function unfreeze() { clearTimeout(freezeT); stage.classList.remove("switching")
 $("codec").addEventListener("change", e => { prefs.codec = e.target.value; savePrefs(); if (cur && split()) { switchVideo(); fillQuality(cur); } });
 $("speed").addEventListener("change", e => { prefs.speed = +e.target.value; savePrefs(); v.playbackRate = a.playbackRate = prefs.speed; });
 $("sb").addEventListener("change", e => { prefs.sb = e.target.checked; savePrefs(); if (!prefs.sb) sbSegs = []; else if (cur && kind === "yt") loadSponsorBlock(cur.id); });
-const setAudioBtn = () => $("audioOnly").setAttribute("aria-pressed", String(prefs.audioOnly));
+const setAudioBtn = () => {
+  $("audioOnly").setAttribute("aria-pressed", String(prefs.audioOnly));
+  const mobA = $("mobAudioBtn");
+  if (mobA) mobA.classList.toggle("on", prefs.audioOnly);
+};
+$("mobAudioBtn")?.addEventListener("click", () => $("audioOnly").click());
 $("audioOnly").addEventListener("click", () => {
   if (cur && kind === "yt") savePos(); // read the position before master() flips to the other element
   prefs.audioOnly = !prefs.audioOnly; savePrefs(); setAudioBtn();
@@ -1387,6 +1582,14 @@ function route() {
   setMenu(false);
   const h = location.hash.slice(1) || "/";
   let m;
+  const isWatch = Boolean(
+    h.match(/^\/watch\/([A-Za-z0-9_-]{11})/) ||
+    h.match(/^\/mx\/watch\/(movie|episode|shorts)\/([0-9a-f]{32})/) ||
+    h.match(/^\/sony\/watch\/(\d{10})/)
+  );
+  if ($("mobBackBtn")) $("mobBackBtn").hidden = !isWatch && onHome();
+  if ($("mobBottomNav")) $("mobBottomNav").style.display = isWatch ? "none" : "";
+
   if ((m = h.match(/^\/watch\/([A-Za-z0-9_-]{11})/))) { if (cur?.id !== m[1] || !master().getAttribute("src")) openVideo(m[1]); return; }
   if ((m = h.match(/^\/mx\/watch\/(movie|episode|shorts)\/([0-9a-f]{32})/))) { if (cur?.id !== m[2]) openMx(m[1], m[2]); return; }
   if ((m = h.match(/^\/sony\/watch\/(\d{10})/))) { if (cur?.id !== m[1]) openSony(m[1]); return; }
@@ -1400,8 +1603,196 @@ function route() {
   else if ((m = h.match(/^\/mx\/season\/([0-9a-f]{32})/))) showMxSeason(m[1]);
   else { $("q").value = ""; showHome(h === "/yt" ? "yt" : h === "/mx" ? "mx" : h === "/sony" ? "sony" : prefs.src); }
 }
+
+// Bottom sheet for mobile settings (Quality, Speed, Codec)
+const sheetBackdrop = $("mobSheetBackdrop"), sheetTitle = $("mobSheetTitle"), sheetContent = $("mobSheetContent");
+function openSheet(title, items, currentVal, onSelect) {
+  sheetTitle.textContent = title;
+  sheetContent.innerHTML = items.map(item => `
+    <button class="sheet-opt${String(item.value) === String(currentVal) ? " active" : ""}" data-val="${esc(item.value)}" type="button">
+      <span>${esc(item.label)}${item.sub ? `<span class="m" style="margin-left:8px;font-size:12px;">${esc(item.sub)}</span>` : ""}</span>
+      ${String(item.value) === String(currentVal) ? `<svg class="i sm"><use href="#i-check"/></svg>` : ""}
+    </button>
+  `).join("");
+  sheetBackdrop.hidden = false;
+  const clickHandler = e => {
+    const btn = e.target.closest(".sheet-opt");
+    if (!btn) return;
+    sheetContent.removeEventListener("click", clickHandler);
+    closeSheet();
+    onSelect(btn.dataset.val);
+  };
+  sheetContent.addEventListener("click", clickHandler);
+}
+function closeSheet() {
+  if (sheetBackdrop) sheetBackdrop.hidden = true;
+}
+$("mobSheetClose")?.addEventListener("click", closeSheet);
+sheetBackdrop?.addEventListener("click", e => {
+  if (e.target === sheetBackdrop) closeSheet();
+});
+
+// Mobile Action Pills in Watch Toolbar
+$("mobQualityBtn")?.addEventListener("click", () => {
+  if (kind === "mx" && hls) {
+    const lv = hls.levels.map((l, i) => [i, l.height]).sort((x, y) => y[1] - x[1]);
+    const items = [{ label: "Best Available", value: BEST }, ...lv.map(([, h]) => ({ label: h + "p", value: h }))];
+    openSheet("Video Quality", items, $("quality").value, val => {
+      $("quality").value = val;
+      $("quality").dispatchEvent(new Event("change"));
+    });
+  } else if (kind === "sony" && dashPlayer) {
+    const hs = [...new Set(sonyLevels().map(l => l.height))];
+    const items = [{ label: "Best Available", value: BEST }, ...hs.map(h => ({ label: h + "p", value: h }))];
+    openSheet("Video Quality", items, $("quality").value, val => {
+      $("quality").value = val;
+      $("quality").dispatchEvent(new Event("change"));
+    });
+  } else if (cur) {
+    const seen = new Set(), opts = [];
+    for (const f of videoPool(cur)) {
+      const k = f.height + (f.fps > 30 ? "p" + f.fps : "p");
+      if (!seen.has(k)) { seen.add(k); opts.push({ label: k, value: f.height }); }
+    }
+    const items = [{ label: "Best Available", value: BEST }, ...opts];
+    openSheet("Video Quality", items, $("quality").value, val => {
+      $("quality").value = val;
+      $("quality").dispatchEvent(new Event("change"));
+    });
+  }
+});
+
+$("mobSpeedBtn")?.addEventListener("click", () => {
+  const speeds = [
+    { label: "0.5x", value: 0.5 },
+    { label: "0.75x", value: 0.75 },
+    { label: "Normal (1.0x)", value: 1 },
+    { label: "1.25x", value: 1.25 },
+    { label: "1.5x", value: 1.5 },
+    { label: "1.75x", value: 1.75 },
+    { label: "2.0x", value: 2 },
+  ];
+  openSheet("Playback Speed", speeds, prefs.speed, val => {
+    prefs.speed = +val;
+    savePrefs();
+    v.playbackRate = a.playbackRate = prefs.speed;
+    $("speed").value = String(prefs.speed);
+    setSpeedLabel(prefs.speed);
+    toast("Speed " + prefs.speed + "x");
+  });
+});
+
+$("mobCodecBtn")?.addEventListener("click", () => {
+  const codecs = [
+    { label: "VP9", value: "vp9", sub: "Hardware GPU (Recommended)" },
+    { label: "H.264", value: "h264", sub: "Broad Hardware Compatibility" },
+    { label: "AV1", value: "av1", sub: "High Efficiency (CPU heavy)" },
+    { label: "Any Codec", value: "any", sub: "Auto selection" }
+  ];
+  openSheet("Video Codec", codecs, prefs.codec, val => {
+    prefs.codec = val;
+    savePrefs();
+    $("codec").value = val;
+    setCodecLabel(val);
+    if (cur && split()) { switchVideo(); fillQuality(cur); }
+  });
+});
+
+$("mobSbBtn")?.addEventListener("click", () => {
+  prefs.sb = !prefs.sb;
+  savePrefs();
+  $("sb").checked = prefs.sb;
+  setSbLabel(prefs.sb);
+  toast("SponsorBlock: " + (prefs.sb ? "Enabled" : "Disabled"));
+  if (!prefs.sb) sbSegs = []; else if (cur && kind === "yt") loadSponsorBlock(cur.id);
+});
+
+// Mobile Search Overlay logic
+const mobSearchOverlay = $("mobSearchOverlay"), mobSearchInput = $("mobSearchInput"), mobSearchClear = $("mobSearchClear");
+function openMobSearch() {
+  mobSearchOverlay.hidden = false;
+  mobSearchInput.value = $("q").value || "";
+  mobSearchClear.hidden = !mobSearchInput.value;
+  setTimeout(() => mobSearchInput.focus(), 60);
+}
+function closeMobSearch() {
+  mobSearchOverlay.hidden = true;
+  mobSearchInput.blur();
+}
+$("mobSearchTrigger")?.addEventListener("click", openMobSearch);
+$("mobSearchBack")?.addEventListener("click", closeMobSearch);
+$("mobSearchClear")?.addEventListener("click", () => {
+  mobSearchInput.value = "";
+  mobSearchClear.hidden = true;
+  mobSearchInput.focus();
+});
+mobSearchInput?.addEventListener("input", () => {
+  mobSearchClear.hidden = !mobSearchInput.value;
+});
+$("mobSearchForm")?.addEventListener("submit", e => {
+  e.preventDefault();
+  const q = mobSearchInput.value.trim();
+  if (!q) return;
+  closeMobSearch();
+  $("q").value = q;
+  const src = /mxplayer\.in/.test(q) ? "mx" : /sonyliv\.com/.test(q) ? "sony" : /youtu\.?be/.test(q) ? "yt" : prefs.src;
+  location.hash = (src === "mx" ? "#/mx/search/" : src === "sony" ? "#/sony/search/" : "#/search/") + encodeURIComponent(q);
+});
+$("mobQuickPills")?.addEventListener("click", e => {
+  const b = e.target.closest("button[data-q]");
+  if (!b) return;
+  const q = b.dataset.q;
+  mobSearchInput.value = q;
+  closeMobSearch();
+  $("q").value = q;
+  location.hash = (prefs.src === "mx" ? "#/mx/search/" : prefs.src === "sony" ? "#/sony/search/" : "#/search/") + encodeURIComponent(q);
+});
+
+// Mobile Bottom Nav Tabs
+$("mobBottomNav")?.addEventListener("click", e => {
+  const b = e.target.closest(".nav-item");
+  if (!b) return;
+  const targetSrc = b.dataset.src;
+  if (onHome() && prefs.src === targetSrc) {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  } else {
+    setSource(targetSrc);
+    location.hash = "#/" + targetSrc;
+  }
+});
+
+// App Hardware / Gesture Back Button handling
+window.handleAppBack = function() {
+  if (sheetBackdrop && !sheetBackdrop.hidden) {
+    closeSheet();
+    return true;
+  }
+  if (mobSearchOverlay && !mobSearchOverlay.hidden) {
+    closeMobSearch();
+    return true;
+  }
+  if (watch.style.display !== "none") {
+    stopPlayback();
+    cur = null;
+    watchAbort?.abort();
+    watch.style.display = "none";
+    list.style.display = "block";
+    location.hash = "#/" + prefs.src;
+    return true;
+  }
+  if (location.hash && location.hash !== "#/" && location.hash !== "#/yt" && location.hash !== "#/mx" && location.hash !== "#/sony") {
+    location.hash = "#/" + prefs.src;
+    return true;
+  }
+  return false;
+};
+$("mobBackBtn")?.addEventListener("click", () => {
+  if (!window.handleAppBack()) history.back();
+});
+
 $("sb").checked = prefs.sb; $("codec").value = prefs.codec; $("speed").value = String(prefs.speed);
 setSource(prefs.src); setAudioBtn(); applyTheme(); applyVolume();
+setSpeedLabel(prefs.speed); setCodecLabel(prefs.codec); setSbLabel(prefs.sb);
 fetch("/api/me").then(r => r.ok ? r.json() : null).then(j => { if (j?.login) $("logout").hidden = false; }).catch(() => {});
 window.addEventListener("hashchange", route);
 route();
