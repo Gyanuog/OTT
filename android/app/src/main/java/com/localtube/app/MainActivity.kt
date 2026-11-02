@@ -96,7 +96,7 @@ class MainActivity : AppCompatActivity() {
                 fullscreenContainer.visibility = View.VISIBLE
                 webView.visibility = View.GONE
 
-                setImmersive(true)
+                setFullscreenBars(true)
             }
 
             override fun onHideCustomView() {
@@ -107,7 +107,7 @@ class MainActivity : AppCompatActivity() {
                 customViewCallback?.onCustomViewHidden()
                 webView.visibility = View.VISIBLE
 
-                setImmersive(false)
+                setFullscreenBars(false)
                 requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
             }
         }
@@ -148,7 +148,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun setImmersive(on: Boolean) {
+    private fun setFullscreenBars(on: Boolean) {
         val ctl = WindowInsetsControllerCompat(window, window.decorView)
         if (on) {
             ctl.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
