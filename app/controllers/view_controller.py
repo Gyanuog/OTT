@@ -13,6 +13,11 @@ class ViewController(BaseController):
         return send_file(handler, index_file, cache_control="no-cache")
 
     @classmethod
+    def app(cls, handler):
+        app_file = os.path.join(STATIC_DIR, "app.html")
+        return send_file(handler, app_file, cache_control="no-cache")
+
+    @classmethod
     def static(cls, handler, path):
         sub_path = path[len("/static/"):].lstrip("/")
         full = os.path.realpath(os.path.join(STATIC_DIR, sub_path))

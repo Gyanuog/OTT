@@ -44,6 +44,10 @@ class AppRequestHandler(BaseHTTPRequestHandler):
             if url.path in ("/", "/index.html"):
                 return ViewController.index(self)
 
+            # Android app UI (separate from the web UI)
+            if url.path in ("/app", "/app.html"):
+                return ViewController.app(self)
+
             if url.path.startswith("/static/"):
                 return ViewController.static(self, url.path)
 
